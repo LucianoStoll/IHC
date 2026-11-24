@@ -10,7 +10,9 @@ No computador, o app aparece dentro de um celular, para facilitar a apresentaç�
 - **Erros recuperáveis:**
   - Tocar em *Embarcou* ou registrar um não embarque por engano: o botão **Desfazer** fica disponível por 10 segundos.
   - Tentar registrar o não embarque sem motivo: o app mostra o que falta. Ao escolher "Outro motivo", é preciso escrever qual foi.
-- **Confirmação:** a janela "Seguir para Vacaria?" resume quem embarcou e quantas pessoas devem estar no carro.
+- **Acompanhante que não veio:** no cartão de Maria, *Embarcou sem Pedro* registra o embarque dela sem o acompanhante. A contagem de pessoas e o painel levam isso em conta.
+- **Confirmação:** a janela "Seguir para Vacaria?" resume quem embarcou e quantas pessoas devem estar no carro. Se ninguém embarcou, ela avisa antes de seguir.
+- **Janelas:** fecham com *Voltar*, com Esc, tocando fora delas ou arrastando a alça para baixo.
 - **Aviso da secretaria:** depois do primeiro embarque, a gestora muda o horário de João. O aviso aparece no topo e o cartão dele fica destacado com o horário antigo riscado.
 - **Acessibilidade e inclusão:**
   - **Ajustes** com texto grande e **modo sol** (alto contraste para ler sob luz forte);
@@ -33,4 +35,4 @@ Ela passa pelo aviso de alteração, pelo erro de motivo (se a pessoa tentar reg
 
 ## Como publicar
 
-Coloque o `index.html` na raiz do repositório `ihc` e ative o GitHub Pages em *Settings → Pages → Deploy from a branch → main / (root)*.
+O site é publicado pelo GitHub Pages a partir da raiz do branch padrão: *Settings → Pages → Deploy from a branch → (branch) / (root)*. O arquivo `.nojekyll` faz o GitHub servir os arquivos como estão.

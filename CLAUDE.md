@@ -131,9 +131,10 @@ As entregas no destino, as retiradas para a volta e a chegada ficam **fora do pr
 - **Servidor simulado:** `E.servidor` é o que o painel "sabe": situação da viagem, estado de cada paciente, motivos, eventos do feed, `ultimaSync`, `semSinalDesde` e `revisarVolta`.
 - **`registrar(ev)`:** todo check passa por aqui. Com sinal, chama `entregar([ev])`, que atualiza `E.servidor` e redesenha o painel. Sem sinal, o check vai para `E.fila`.
 - **Volta do sinal:** a fila é ordenada pela hora do aparelho (RN15) e entregue de uma vez.
-- **Desfazer:** se ainda está na fila, o check é retirado; se já foi entregue, gera um evento de correção.
+- **Desfazer:** se o check ainda está na fila (`E.desfazer.ev`), é retirado dela; se já foi entregue, gera um evento de correção, que também passa por `registrar()` (vai pela fila se estiver sem sinal).
+- **Acompanhante:** *Embarcou sem (nome)* registra o embarque com `semAcomp:true`. Não é um estado novo do Embarque; é um detalhe do check de embarque. **Precisa constar no relatório** (RF13), junto com a contagem de pessoas no carro.
 - **Renderização:** `render(foco)` redesenha o cabeçalho, a faixa de sinal, a lista e a barra inferior, e move o foco para o seletor indicado. `renderPainel()` só desenha se o painel estiver visível.
-- **Janelas** (`dlg-nao`, `dlg-seguir`, `dlg-ajustes`): são `<dialog>` abertos com `.show()`, não com `showModal()`, para ficarem **dentro do celular**. `abrir()` e `fechar()` cuidam do véu e de `inert` no resto da tela. O Esc é tratado manualmente.
+- **Janelas** (`dlg-nao`, `dlg-seguir`, `dlg-ajustes`): são `<dialog>` abertos com `.show()`, não com `showModal()`, para ficarem **dentro do celular**. `abrir()` e `fechar()` cuidam do véu e de `inert` no resto da tela. O Esc, o toque no véu e arrastar a alça para baixo chamam `fecharAtual()`, que devolve o foco a quem abriu a janela.
 - **Elementos posicionados:** a barra inferior, o toast e as janelas usam `position:absolute` dentro de `.moldura` (que tem `transform`), não `fixed`.
 - **Comportamentos temporizados:**
   - A alteração do João dispara **2,5 s depois do primeiro embarque** (`agendarAlteracao()`). Se o celular estiver sem sinal, fica pendente até o sinal voltar.

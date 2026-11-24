@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0E5E5A">
 <title>Lista do dia · Transporte Saúde</title>
+<meta name="description" content="Protótipo navegável do app do motorista e do painel da secretaria para o transporte de pacientes.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Transporte Saúde · protótipo">
+<meta property="og:description" content="App do motorista: conferir a viagem do dia, registrar o embarque de cada paciente e seguir para o destino.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230E5E5A'/%3E%3Cpath d='M14 8h4v6h6v4h-6v6h-4v-6H8v-4h6z' fill='%23fff'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
@@ -138,7 +143,8 @@ dialog{position:absolute;left:0;right:0;bottom:0;z-index:40;border:0;padding:0;w
 html.modo-sol dialog{border:2px solid #FFF;border-bottom:0}
 .veu{position:absolute;inset:0;z-index:35;background:rgba(18,32,30,.6)}
 .dlg{padding:.75rem 1.25rem calc(1.5rem + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:1rem}
-.alca{align-self:center;width:2.5rem;height:.3rem;border-radius:999px;background:var(--line)}
+.alca{align-self:center;width:2.5rem;height:.3rem;border-radius:999px;background:var(--line);position:relative;touch-action:none;cursor:grab}
+.alca::before{content:"";position:absolute;inset:-.9rem -5rem}
 .dlg .sobre{font-size:.8125rem;font-weight:700;color:var(--warn-strong)}
 .dlg h2{font-family:"Space Grotesk",Inter,sans-serif;font-size:1.375rem}
 fieldset{border:0;margin:0;padding:0;min-width:0}
@@ -254,7 +260,10 @@ body.demo{background:#D5DEDB;min-height:100vh;display:flex;flex-direction:column
 .p-pacs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
 .p-pacs li{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:14px}
 .p-feed{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;font-size:14px}
-.p-feed li{display:flex;gap:10px}
+.p-feed li{display:flex;gap:10px;align-items:baseline;padding:4px 8px;margin:0 -8px;border-radius:8px;transition:background-color .8s}
+.p-feed li.novo{background:#FFF7EC}
+.tag-novo{font-size:11px;font-weight:700;color:#7A3106;border:1.5px solid #E39A3B;border-radius:999px;padding:0 6px;margin-left:6px;white-space:nowrap}
+.p-feed li:not(.novo) .tag-novo{display:none}
 .p-feed time{color:#4A5A57;font-variant-numeric:tabular-nums;width:42px;flex-shrink:0}
 .p-feed .alt{color:#7A3106}
 .p-vazio{font-size:14px;color:#4A5A57}
@@ -406,7 +415,7 @@ function novoEstado(){
     ],
     volta:[{nome:"Ana Ribeiro", local:"Hospital de Vacaria", hora:"15:00"}],
     alteracao:null, alteracaoFeita:false, offline:false, fila:[], desfazer:null, emViagem:false,
-    servidor:{viagem:"agendada", pac:{maria:"pendente",joao:"pendente",teresinha:"pendente"}, motivos:{}, eventos:[], ultimaSync:"05:20", revisarVolta:false, semSinalDesde:null}
+    servidor:{viagem:"agendada", pac:{maria:"pendente",joao:"pendente",teresinha:"pendente"}, motivos:{}, semAcomp:{}, eventos:[], ultimaSync:"05:20", revisarVolta:false, semSinalDesde:null}
   };
 }
 var E = novoEstado();
@@ -423,12 +432,14 @@ function toast(t){ var e=$("#toast"); e.textContent=t; e.hidden=false; clearTime
 function registrar(ev){
   ev.hora=hora();
   if (E.offline){ E.fila.push(ev); } else { entregar([ev]); E.servidor.ultimaSync=ev.hora; }
+  return ev;
 }
+function primeiroNomeAcomp(p){ return p.acomp ? p.acomp.split(" ")[0] : ""; }
 function entregar(lista){
   var S=E.servidor;
   lista.forEach(function(ev){
     if (ev.viagem) S.viagem=ev.viagem;
-    if (ev.pid){ S.pac[ev.pid]=ev.estado; if (ev.motivo) S.motivos[ev.pid]=ev.motivo; else delete S.motivos[ev.pid]; }
+    if (ev.pid){ S.pac[ev.pid]=ev.estado; S.semAcomp[ev.pid]=!!ev.semAcomp; if (ev.motivo) S.motivos[ev.pid]=ev.motivo; else delete S.motivos[ev.pid]; }
     if (ev.revisar!==undefined) S.revisarVolta=ev.revisar;
     S.eventos.unshift({hora:ev.hora, txt:ev.txt, tipo:ev.tipo||"", novo:true});
   });
@@ -478,12 +489,15 @@ function cartao(p){
   } else if (p.estado==="nao"){
     corpo = '<p class="pac-sub">Motivo: '+esc(p.motivo)+'</p>';
   }
+  if (p.estado==="pendente" && p.acomp && E.viagem.situacao==="andamento"){
+    corpo += '<button type="button" class="btn sec" data-a="embarcou-so" data-id="'+p.id+'">Embarcou sem '+esc(primeiroNomeAcomp(p))+'</button>';
+  }
   if (E.desfazer && E.desfazer.id===p.id){
     corpo += '<div class="linha-desfazer"><span>Registrado às '+p.horaReg+'.</span><button type="button" class="btn link" data-a="desfazer" data-id="'+p.id+'">Desfazer</button></div>';
   }
   var cls = "pac" + (E.alteracao && E.alteracao.id===p.id && !E.alteracao.lida ? " alterado" : "");
   return '<li class="'+cls+'" id="pac-'+p.id+'"><div class="pac-topo"><div class="coluna" style="gap:.15rem"><h3 class="pac-nome">'+esc(p.nome)+'</h3>'
-    + (p.acomp?'<span class="pac-sub">Com acompanhante: '+esc(p.acomp)+'</span>':'')
+    + (p.acomp?(p.semAcomp?'<span class="pac-sub">Sem acompanhante: '+esc(p.acomp)+' não veio</span>':'<span class="pac-sub">Com acompanhante: '+esc(p.acomp)+'</span>'):'')
     + '</div>'+selo+'</div>'+info+corpo+'</li>';
 }
 
@@ -508,7 +522,7 @@ function telaLista(){
 }
 
 function telaEmViagem(){
-  var emb=embarcados(), nAc=emb.filter(function(p){return p.acomp;}).length;
+  var emb=embarcados(), nAc=emb.filter(function(p){return p.acomp && !p.semAcomp;}).length;
   var h='<div class="grande-ok"><span class="check" style="color:var(--on-accent)">'+IC.ok+'</span><h1 tabindex="-1" id="t-ok">Viagem em andamento</h1><p>Os embarques foram '+(E.offline?'guardados no celular e vão para a secretaria quando o sinal voltar.':'enviados para a secretaria.')+'</p></div>';
   h += '<div class="resumo-num" role="list"><div role="listitem"><b>'+emb.length+'</b><span>embarcaram</span></div><div role="listitem"><b>'+nAc+'</b><span>acompanhante'+(nAc===1?'':'s')+'</span></div><div role="listitem"><b>'+E.pacientes.filter(function(p){return p.estado==="nao";}).length+'</b><span>não embarcaram</span></div></div>';
   h += '<section class="cartao" aria-labelledby="prox-t"><h2 id="prox-t" style="font-size:1.0625rem">Próximas entregas</h2><ul class="tabela">';
@@ -540,18 +554,22 @@ document.addEventListener("click", function(ev){
     passa(4); E.viagem.situacao="andamento"; E.viagem.saida=hora(); registrar({txt:"Saída de Esmeralda registrada", viagem:"andamento"});
     render('[data-a="embarcou"]'); anunciar("Viagem iniciada às "+E.viagem.saida+". Registre o embarque de cada paciente.");
   }
-  if (a==="embarcou"){
-    passa(6); p.estado="embarcado"; p.horaReg=hora(); registrar({txt:p.nome+" embarcou", pid:p.id, estado:"embarcado"});
-    marcarDesfazer(p);
+  if (a==="embarcou" || a==="embarcou-so"){
+    var so = a==="embarcou-so";
+    passa(6); p.estado="embarcado"; p.semAcomp=so; p.horaReg=hora();
+    var txt = p.nome+" embarcou"+(so?" sem o acompanhante ("+p.acomp+" não veio)":(p.acomp?" com o acompanhante":""));
+    var evE = registrar({txt:txt, pid:p.id, estado:"embarcado", semAcomp:so, tipo:so?"alt":""});
+    marcarDesfazer(p, evE);
     render("#pac-"+p.id+' [data-a="desfazer"]');
-    anunciar(p.nome+" embarcou às "+p.horaReg+". Se foi engano, use Desfazer.");
+    anunciar((so ? p.nome+" embarcou às "+p.horaReg+", sem "+primeiroNomeAcomp(p)+"." : p.nome+" embarcou às "+p.horaReg+".")+" Se foi engano, use Desfazer.");
     if (!E.alteracaoFeita) agendarAlteracao();
   }
   if (a==="nao"){ abrirNao(p); }
   if (a==="desfazer"){
-    clearTimeout(undoTimer); E.desfazer=null; var era=p.estado; p.estado="pendente"; p.motivo=null;
-    if (E.offline) E.fila.pop();
-    else registrar({txt:"Registro corrigido pelo motorista: "+p.nome+" voltou para Aguardando", pid:p.id, estado:"pendente", revisar:(era==="nao"&&p.voltaOutra)?false:undefined, tipo:"alt"});
+    clearTimeout(undoTimer); var evOrig=E.desfazer && E.desfazer.ev; E.desfazer=null; var era=p.estado; p.estado="pendente"; p.motivo=null; p.semAcomp=false;
+    var iFila = evOrig ? E.fila.indexOf(evOrig) : -1;
+    if (iFila>=0) E.fila.splice(iFila,1); /* ainda não saiu do celular: só retira da fila */
+    else registrar({txt:"Registro corrigido pelo motorista: "+p.nome+" voltou para Aguardando", pid:p.id, estado:"pendente", revisar:(era==="nao"&&p.voltaOutra)?false:undefined, tipo:"alt"}); /* já entregue: correção (vai pela fila se estiver sem sinal) */
     render("#pac-"+p.id+' [data-a="embarcou"]'); anunciar("Registro desfeito. "+p.nome+" voltou para Aguardando.");
   }
   if (a==="entendi"){
@@ -563,8 +581,8 @@ document.addEventListener("click", function(ev){
   if (a==="voltar-lista"){ E.emViagem=false; render("#titulo"); }
 });
 
-function marcarDesfazer(p){
-  clearTimeout(undoTimer); E.desfazer={id:p.id};
+function marcarDesfazer(p, ev){
+  clearTimeout(undoTimer); E.desfazer={id:p.id, ev:ev};
   undoTimer=setTimeout(function(){
     if (E.desfazer && E.desfazer.id===p.id){
       var foco=document.activeElement && document.activeElement.getAttribute("data-a")==="desfazer";
@@ -585,7 +603,7 @@ function aplicarAlteracao(){
   E.alteracaoPendente=false;
   var j=pac("joao");
   j.horaAntiga=j.hora; j.hora="10:30";
-  E.servidor.eventos.unshift({hora:hora(), txt:"Rita alterou o horário de João Fulano: 08:00 → 10:30", tipo:"", novo:true}); renderPainel();
+  E.servidor.eventos.unshift({hora:hora(), txt:"Rita alterou o horário de João Fulano: 08:00 → 10:30. Motorista avisado.", tipo:"", novo:true}); renderPainel();
   E.alteracao={id:"joao", hora:hora(), lida:false, texto:"João Fulano agora deve estar na Clínica de Imagem às 10:30 (antes 08:00). O local de embarque continua o mesmo."};
   var foco=document.activeElement, sel=foco && foco.getAttribute("data-a") ? '[data-a="'+foco.getAttribute("data-a")+'"]'+(foco.getAttribute("data-id")?'[data-id="'+foco.getAttribute("data-id")+'"]':'') : null;
   render(sel);
@@ -600,18 +618,36 @@ function abrir(d){
   ["#tela","#barra","#demo-barra"].forEach(function(q){ $(q).inert=true; });
 }
 function fechar(d){
-  d.close(); aberto=null; $("#veu").hidden=true;
+  d.close(); d.style.transform=""; aberto=null; $("#veu").hidden=true;
   ["#tela","#barra","#demo-barra"].forEach(function(q){ $(q).inert=false; });
 }
-document.addEventListener("keydown", function(ev){
-  if (ev.key==="Escape" && aberto){
-    var d=aberto; fechar(d);
-    if (d.id==="dlg-ajustes") $("#abrir-ajustes").focus();
-    else if (d.id==="dlg-nao" && alvoNao){ var b=$("#pac-"+alvoNao.id+' [data-a="nao"]'); if (b) b.focus(); }
-    else { var s2=$('[data-a="seguir"]'); if (s2) s2.focus(); }
+/* fecha a janela aberta sem registrar nada e devolve o foco para quem a abriu (Esc, toque fora, arrastar a alça) */
+function fecharAtual(){
+  if (!aberto) return;
+  var d=aberto; fechar(d);
+  if (d.id==="dlg-ajustes") $("#abrir-ajustes").focus();
+  else if (d.id==="dlg-nao" && alvoNao){ var b=$("#pac-"+alvoNao.id+' [data-a="nao"]'); if (b) b.focus(); }
+  else { var s2=$('[data-a="seguir"]'); if (s2) s2.focus(); }
+}
+document.addEventListener("keydown", function(ev){ if (ev.key==="Escape" && aberto) fecharAtual(); });
+$("#veu").addEventListener("click", fecharAtual);
+/* arrastar a alça para baixo fecha a janela, como nas folhas inferiores do Android */
+Array.prototype.forEach.call(document.querySelectorAll("dialog .alca"), function(alca){
+  var d=alca.closest("dialog"), y0=null, dy=0;
+  alca.addEventListener("pointerdown", function(ev){ y0=ev.clientY; dy=0; try{ alca.setPointerCapture(ev.pointerId); }catch(e){} });
+  alca.addEventListener("pointermove", function(ev){
+    if (y0===null) return;
+    dy=Math.max(0, ev.clientY-y0);
+    d.style.transform="translateY("+(dy/escalaAtual)+"px)";
+  });
+  function soltar(){
+    if (y0===null) return;
+    y0=null;
+    if (dy>70) fecharAtual(); else d.style.transform="";
   }
+  alca.addEventListener("pointerup", soltar);
+  alca.addEventListener("pointercancel", soltar);
 });
-$("#veu").addEventListener("click", function(){ if (aberto && aberto.id==="dlg-ajustes") fecharAjustes(); });
 
 /* ---------- não embarque ---------- */
 var dlgN=$("#dlg-nao"), alvoNao=null;
@@ -656,11 +692,13 @@ $("#form-nao").addEventListener("submit", function(ev){
 var dlgS=$("#dlg-seguir");
 function abrirSeguir(){
   var emb=embarcados(), nao=E.pacientes.filter(function(p){return p.estado==="nao";});
-  var pessoas=emb.length+emb.filter(function(p){return p.acomp;}).length;
+  var pessoas=emb.length+emb.filter(function(p){return p.acomp && !p.semAcomp;}).length;
   var h='<ul class="tabela">';
-  emb.forEach(function(p){ h+='<li><span>'+esc(p.nome)+(p.acomp?' + acompanhante':'')+'</span><span>Embarcou</span></li>'; });
+  emb.forEach(function(p){ h+='<li><span>'+esc(p.nome)+(p.acomp?(p.semAcomp?' (sem acompanhante)':' + acompanhante'):'')+'</span><span>Embarcou</span></li>'; });
   nao.forEach(function(p){ h+='<li><span>'+esc(p.nome)+'</span><span>Não embarcou</span></li>'; });
-  h+='</ul><p style="margin-top:.75rem"><b>'+pessoas+' '+(pessoas===1?'pessoa':'pessoas')+' no carro.</b> Confira se está todo mundo antes de seguir.</p>';
+  h+='</ul>';
+  if (pessoas===0) h+='<p class="nota" style="margin-top:.75rem"><b>Nenhum paciente embarcou.</b> A viagem ainda tem as missões do dia. Se tiver dúvida, ligue para a secretaria antes de seguir.</p>';
+  else h+='<p style="margin-top:.75rem"><b>'+pessoas+' '+(pessoas===1?'pessoa':'pessoas')+' no carro, além de você.</b> Confira se está todo mundo antes de seguir.</p>';
   if (E.alteracao && !E.alteracao.lida) h+='<p class="nota" style="margin-top:.75rem">Você ainda não leu o aviso da secretaria sobre o horário de João.</p>';
   $("#seguir-corpo").innerHTML=h;
   abrir(dlgS); $("#seguir-ok").focus();
@@ -743,14 +781,18 @@ function renderPainel(){
   h+='<div class="p-det"><section class="p-card" aria-labelledby="det-t"><div><h2 id="det-t">Vacaria · saída 05:30</h2><p class="sub">Carlos Menezes · Spin IXY2B34</p></div>';
   h+= S.semSinalDesde ? '<p class="p-conexao off" role="status">Motorista sem sinal desde '+S.semSinalDesde+'. Pode haver registros ainda não recebidos; espere antes de cancelar ou transferir algo desta viagem.</p>'
                       : '<p class="p-conexao" role="status">Motorista conectado. Última sincronização às '+S.ultimaSync+'.</p>';
-  h+='<ul class="p-pacs">'; Object.keys(S.pac).forEach(function(k){ h+='<li><span>'+nomes[k]+(k==="maria"?' + acompanhante':'')+'</span>'+chipPac(S.pac[k])+'</li>'; }); h+='<li><span>Ana Ribeiro (só volta, 15:00)</span><span class="chip pen">Na volta</span></li></ul></section>';
+  h+='<ul class="p-pacs">'; Object.keys(S.pac).forEach(function(k){ h+='<li><span>'+nomes[k]+(k==="maria"?(S.semAcomp.maria?' · acompanhante não veio':' + acompanhante'):'')+'</span>'+chipPac(S.pac[k])+'</li>'; }); h+='<li><span>Ana Ribeiro (só volta, 15:00)</span><span class="chip pen">Na volta</span></li></ul></section>';
   h+='<section class="p-card" aria-labelledby="feed-t"><div><h2 id="feed-t">Ao vivo</h2><p class="sub">Checks do motorista e alterações, do mais recente ao mais antigo</p></div>';
   if (!S.eventos.length) h+='<p class="p-vazio">Nada registrado ainda. Inicie a viagem no app do motorista e os registros aparecem aqui.</p>';
-  else { h+='<ol class="p-feed">'; S.eventos.forEach(function(e){ h+='<li class="'+(e.novo?'novo ':'')+'"><time>'+e.hora+'</time><span class="'+e.tipo+'">'+esc(e.txt)+'</span></li>'; }); h+='</ol>'; }
+  else { h+='<ol class="p-feed">'; S.eventos.forEach(function(e){ h+='<li class="'+(e.novo?'novo':'')+'"><time>'+e.hora+'</time><span class="'+e.tipo+'">'+esc(e.txt)+'<span class="tag-novo">novo</span></span></li>'; }); h+='</ol>'; }
   h+='</section></div></div></main>';
   el.innerHTML=h;
   S.eventos.forEach(function(e){ e.novo=false; });
+  /* o destaque de "novo" some sozinho depois de alguns segundos, sem redesenhar (não tira o foco da gestora) */
+  clearTimeout(novoTimer);
+  novoTimer=setTimeout(function(){ Array.prototype.forEach.call(el.querySelectorAll(".p-feed li.novo"), function(li){ li.classList.remove("novo"); }); }, 8000);
 }
+var novoTimer=null;
 var ptt=null;
 document.addEventListener("click", function(ev){
   var t=ev.target.closest('[data-p="fora"]'); if (!t) return;
@@ -774,12 +816,13 @@ $("#ver-motorista").addEventListener("click", function(){ if (location.hash==="#
 $("#ver-gestor").addEventListener("click", function(){ if (location.hash!=="#gestor") history.pushState(null,"","#gestor"); mudarModo("gestor", true); });
 window.addEventListener("popstate", function(){ mudarModo(location.hash==="#gestor"?"gestor":"motorista", false); });
 
+var escalaAtual=1;
 function ajustarEscala(){
   var cel=$("#celular"), esc2=$("#escala");
   document.body.style.setProperty("--barra-demo", $("#demo-barra").offsetHeight+"px");
-  if (window.innerWidth<=500){ cel.style.transform=""; esc2.style.height=""; return; }
+  if (window.innerWidth<=500){ cel.style.transform=""; esc2.style.height=""; escalaAtual=1; return; }
   var disp=window.innerHeight-$("#demo-barra").offsetHeight-56;
-  var k=Math.min(1, Math.max(.55, disp/868));
+  var k=Math.min(1, Math.max(.55, disp/868)); escalaAtual=k;
   cel.style.transform="scale("+k+")"; esc2.style.height=(868*k)+"px"; esc2.style.width=(414*k)+"px";
   cel.style.marginLeft=((414*k-414)/2)+"px";
 }
