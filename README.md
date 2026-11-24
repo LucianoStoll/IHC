@@ -8,7 +8,7 @@ No computador, o app aparece dentro de um celular, para facilitar a apresentaç�
 
 - **Caminho principal:** Iniciar viagem → registrar *Embarcou* ou *Não embarcou* para cada paciente → *Seguir para Vacaria* → tela "Viagem em andamento".
 - **Erros recuperáveis:**
-  - Tocar em *Embarcou* ou registrar um não embarque por engano: o botão **Desfazer** fica disponível por 10 segundos.
+  - Tocar em *Embarcou* ou registrar um não embarque por engano: o botão **Desfazer** fica disponível no último registro até o próximo registro ou até seguir viagem.
   - Tentar registrar o não embarque sem motivo: o app mostra o que falta. Ao escolher "Outro motivo", é preciso escrever qual foi.
 - **Acompanhante que não veio:** no cartão de Maria, *Embarcou sem Pedro* registra o embarque dela sem o acompanhante. A contagem de pessoas e o painel levam isso em conta.
 - **Confirmação:** a janela "Seguir para Vacaria?" resume quem embarcou e quantas pessoas devem estar no carro. Se ninguém embarcou, ela avisa antes de seguir.
@@ -32,6 +32,11 @@ No computador, o app aparece dentro de um celular, para facilitar a apresentaç�
 > "Você é o motorista da viagem das 5h30 para Vacaria. Inicie a viagem, registre que Maria e João embarcaram e que Teresinha não embarcou porque desistiu, e siga viagem."
 
 Ela passa pelo aviso de alteração, pelo erro de motivo (se a pessoa tentar registrar sem escolher) e pela confirmação.
+
+## Versões
+
+- **v1 (antes das correções de acessibilidade):** tag `v1` no git e cópia em `/v1/` (link `.../IHC/v1/`). É a versão "antes" da etapa 6.
+- **Versão atual:** a v1 com as correções de acessibilidade. As mudanças estão listadas em `MUDANCAS.md`.
 
 ## Como publicar
 

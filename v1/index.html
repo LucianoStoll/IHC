@@ -1,0 +1,836 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0E5E5A">
+<title>Lista do dia · Transporte Saúde</title>
+<meta name="description" content="Protótipo navegável do app do motorista e do painel da secretaria para o transporte de pacientes.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Transporte Saúde · protótipo">
+<meta property="og:description" content="App do motorista: conferir a viagem do dia, registrar o embarque de cada paciente e seguir para o destino.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230E5E5A'/%3E%3Cpath d='M14 8h4v6h6v4h-6v6h-4v-6H8v-4h6z' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ground:#EEF2F0; --surface:#FFFFFF; --ink:#12201E; --muted:#4A5A57; --line:#B9C6C3;
+  --accent:#0E5E5A; --accent-hover:#0A4441; --on-accent:#FFFFFF; --accent-soft:#DCEDEA;
+  --warn:#7A3106; --warn-strong:#9A3F07; --warn-bg:#FFF7EC; --warn-line:#E39A3B;
+  --info:#1D4ED8; --info-bg:#E0E9FB;
+  --neutral:#3B4A47; --neutral-bg:#E4EAE8;
+  --err:#A61B1B; --err-bg:#FCE9E9;
+  --dark:#12201E; --on-dark:#FFFFFF; --dark-muted:#C9D6D3;
+  --focus:#F2B35B;
+  --toque:3.25rem;
+}
+html.texto-grande{font-size:118%}
+html.texto-muito-grande{font-size:135%}
+html.modo-sol{
+  --ground:#000; --surface:#000; --ink:#FFF; --muted:#FFF; --line:#FFF;
+  --accent:#FFE14D; --accent-hover:#FFF; --on-accent:#000; --accent-soft:#000;
+  --warn:#FFE14D; --warn-strong:#FFE14D; --warn-bg:#000; --warn-line:#FFE14D;
+  --info:#8EC5FF; --info-bg:#000; --neutral:#FFF; --neutral-bg:#000;
+  --err:#FF9A9A; --err-bg:#000; --dark:#FFF; --on-dark:#000; --dark-muted:#000; --focus:#8EC5FF;
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.45}
+.app{min-height:100%;background:var(--ground);display:flex;flex-direction:column;padding-bottom:calc(6.5rem + env(safe-area-inset-bottom,0px))}
+h1,h2,h3,p{margin:0}
+h1,h2,h3{line-height:1.15}
+button,input,textarea{font:inherit;color:inherit}
+a{color:var(--accent)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.pular{position:absolute;left:.5rem;top:-5rem;z-index:60;background:var(--dark);color:var(--on-dark);padding:.75rem 1rem;border-radius:10px}
+.pular:focus{top:.5rem}
+
+/* cabeçalho da viagem */
+.cab{background:var(--accent);color:var(--on-accent);padding:calc(1rem + env(safe-area-inset-top,0px)) 1.25rem 1.1rem;display:flex;flex-direction:column;gap:.85rem}
+.cab-topo{display:flex;justify-content:space-between;align-items:center;gap:.5rem}
+.cab-data{font-size:.875rem;font-weight:500}
+.pilula{font-size:.8125rem;font-weight:600;background:rgba(255,255,255,.16);padding:.25rem .65rem;border-radius:999px}
+html.modo-sol .pilula{background:#000;color:#FFE14D;border:1.5px solid #000}
+.btn-ajustes{min-height:2.75rem;padding:0 .85rem;border-radius:10px;border:1.5px solid rgba(255,255,255,.55);background:transparent;color:inherit;font-weight:600;font-size:.9375rem;cursor:pointer;display:inline-flex;align-items:center;gap:.4rem}
+html.modo-sol .btn-ajustes{border-color:#000}
+.cab h1{font-family:"Space Grotesk",Inter,sans-serif;font-size:2rem;font-weight:700}
+.cab .rot{font-size:.875rem;font-weight:500}
+.cab-grade{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem}
+.cab-bloco{background:rgba(255,255,255,.12);border-radius:12px;padding:.6rem .75rem;display:flex;flex-direction:column;gap:.1rem}
+html.modo-sol .cab-bloco{background:#000;color:#FFE14D}
+.cab-bloco .r{font-size:.75rem}
+.cab-bloco .v{font-size:1.0625rem;font-weight:700}
+.cab-bloco .s{font-size:.75rem}
+
+/* faixas de estado */
+.faixa{display:flex;gap:.75rem;align-items:flex-start;padding:.85rem 1.25rem;background:var(--dark);color:var(--on-dark)}
+.faixa svg{flex-shrink:0;width:1.4rem;height:1.4rem;margin-top:.1rem}
+.faixa strong{display:block}
+.faixa .d{color:var(--dark-muted);font-size:.875rem}
+.faixa[hidden]{display:none}
+.faixa.ok{background:var(--accent-soft);color:var(--ink)}
+.faixa.ok .d{color:var(--muted)}
+
+main{flex:1;padding:1rem;display:flex;flex-direction:column;gap:1rem}
+main:focus{outline:none}
+.titulo-sec{display:flex;justify-content:space-between;align-items:baseline;gap:.5rem}
+.titulo-sec h2{font-size:1.0625rem;font-weight:700}
+.titulo-sec span{font-size:.875rem;color:var(--muted)}
+
+/* aviso de alteração */
+.alteracao{background:var(--dark);color:var(--on-dark);border-radius:16px;padding:1rem;display:flex;flex-direction:column;gap:.75rem}
+.alteracao .topo{display:flex;gap:.75rem;align-items:center}
+.alteracao .sino{color:#12201E;width:2.25rem;height:2.25rem;border-radius:50%;background:#F2B35B;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+html.modo-sol .alteracao .sino{background:#000;color:#FFF}
+.alteracao .sino svg{width:1.2rem;height:1.2rem}
+.alteracao .quem{font-size:.8125rem;color:var(--dark-muted)}
+.alteracao .btn{background:var(--surface);color:var(--ink);border-color:var(--surface)}
+html.modo-sol .alteracao .btn{background:#000;color:#FFF;border-color:#000}
+
+/* missões */
+.missoes{background:var(--warn-bg);border:1.5px solid var(--warn-line);border-radius:14px;padding:.85rem 1rem;display:flex;flex-direction:column;gap:.4rem}
+.missoes h2{font-size:.9375rem;color:var(--warn);display:flex;align-items:center;gap:.5rem}
+.missoes h2 svg{width:1.1rem;height:1.1rem}
+.missoes ul{margin:0;padding-left:1.1rem;color:var(--ink);font-size:.9375rem;display:flex;flex-direction:column;gap:.2rem}
+
+/* cartões de paciente */
+.lista{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.75rem}
+.pac{background:var(--surface);border-radius:14px;padding:1rem;display:flex;flex-direction:column;gap:.7rem;border:1.5px solid transparent}
+html.modo-sol .pac{border-color:#FFF}
+.pac.alterado{background:var(--warn-bg);border:2px solid var(--warn-line)}
+.pac-topo{display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem}
+.pac-nome{font-size:1.0625rem;font-weight:700}
+.pac-sub{font-size:.875rem;color:var(--muted)}
+.pac-info{display:flex;flex-wrap:wrap;gap:.25rem 1rem;font-size:.875rem;color:var(--muted)}
+.pac-info strong{color:var(--ink);font-weight:600}
+.trecho-alerta{color:var(--warn-strong);font-weight:700}
+.trecho-volta{color:var(--info);font-weight:700}
+.selo{font-size:.75rem;font-weight:700;padding:.25rem .55rem;border-radius:999px;white-space:nowrap}
+.selo.pendente{color:var(--neutral);background:var(--neutral-bg)}
+.selo.embarcado{color:var(--accent);background:var(--accent-soft)}
+.selo.nao{color:#FFF;background:#5B6664}
+.selo.volta{color:var(--info);background:var(--info-bg)}
+.selo.alt{color:#FFF;background:var(--warn-strong)}
+html.modo-sol .selo{border:1.5px solid currentColor;background:#000}
+html.modo-sol .selo.nao,html.modo-sol .selo.alt{color:#FFF}
+.horario-mudou{display:flex;align-items:center;gap:.4rem;font-size:.9375rem}
+.horario-mudou s{color:var(--muted)}
+.horario-mudou b{color:var(--warn)}
+.acoes2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem}
+.linha-desfazer{display:flex;justify-content:space-between;align-items:center;gap:.5rem;background:var(--accent-soft);border-radius:10px;padding:.35rem .35rem .35rem .75rem;font-size:.9375rem}
+html.modo-sol .linha-desfazer{border:1.5px solid #FFF}
+.ligar{display:inline-flex;align-items:center;gap:.35rem;min-height:2.75rem;font-weight:600;text-decoration:none}
+.ligar svg{width:1rem;height:1rem}
+
+/* botões */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:var(--toque);padding:0 1rem;border-radius:12px;border:2px solid var(--accent);background:var(--accent);color:var(--on-accent);font-weight:700;font-size:1rem;cursor:pointer;text-decoration:none;text-align:center;width:100%}
+.btn:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+.btn.sec{background:var(--surface);color:var(--ink);border-color:var(--line)}
+.btn.sec:hover{border-color:var(--ink)}
+.btn.link{background:transparent;border-color:transparent;color:var(--accent);text-decoration:underline;width:auto;min-height:2.75rem;padding:0 .5rem}
+.btn.grande{min-height:3.75rem;font-size:1.125rem}
+.coluna{display:flex;flex-direction:column;gap:.5rem}
+
+/* barra inferior */
+.barra{position:absolute;left:0;right:0;bottom:0;z-index:20;display:flex;justify-content:center;padding:.75rem 1rem calc(.75rem + env(safe-area-inset-bottom,0px));background:linear-gradient(to top,var(--ground) 75%,transparent)}
+.barra > *{max-width:24.5rem}
+.barra[hidden]{display:none}
+
+/* diálogos */
+dialog{position:absolute;left:0;right:0;bottom:0;z-index:40;border:0;padding:0;width:100%;margin:0;overflow-y:auto;border-radius:22px 22px 0 0;background:var(--surface);color:var(--ink);max-height:94%}
+html.modo-sol dialog{border:2px solid #FFF;border-bottom:0}
+.veu{position:absolute;inset:0;z-index:35;background:rgba(18,32,30,.6)}
+.dlg{padding:.75rem 1.25rem calc(1.5rem + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:1rem}
+.alca{align-self:center;width:2.5rem;height:.3rem;border-radius:999px;background:var(--line);position:relative;touch-action:none;cursor:grab}
+.alca::before{content:"";position:absolute;inset:-.9rem -5rem}
+.dlg .sobre{font-size:.8125rem;font-weight:700;color:var(--warn-strong)}
+.dlg h2{font-family:"Space Grotesk",Inter,sans-serif;font-size:1.375rem}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+legend{padding:0;font-weight:700;margin-bottom:.5rem}
+.opcoes{display:flex;flex-direction:column;gap:.5rem}
+.opcao{display:flex;align-items:center;gap:.75rem;min-height:3.25rem;border:1.5px solid var(--line);border-radius:12px;padding:.6rem .9rem;cursor:pointer;font-size:1rem}
+.opcao input{width:1.375rem;height:1.375rem;margin:0;accent-color:var(--accent);flex-shrink:0}
+.opcao:has(input:checked){border:2px solid var(--accent);background:var(--accent-soft);font-weight:600;padding:calc(.6rem - .5px) calc(.9rem - .5px)}
+.erro .opcao{border-color:var(--err)}
+.msg-erro{color:var(--err);font-weight:700;display:flex;gap:.4rem;align-items:flex-start;margin-bottom:.5rem}
+.msg-erro[hidden]{display:none}
+label.campo{display:flex;flex-direction:column;gap:.35rem;font-weight:700}
+label.campo .d{font-weight:400;color:var(--muted);font-size:.875rem}
+textarea{border:1.5px solid var(--line);border-radius:12px;padding:.7rem .8rem;background:var(--surface);min-height:4.5rem;resize:vertical;font-weight:400}
+textarea[aria-invalid="true"]{border:2px solid var(--err)}
+.nota{background:var(--warn-bg);border-radius:12px;padding:.7rem .85rem;font-size:.875rem;color:var(--warn)}
+html.modo-sol .nota{border:1.5px solid #FFE14D}
+
+/* resumo */
+.resumo-num{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.5rem}
+.resumo-num div{background:var(--surface);border-radius:12px;padding:.75rem;display:flex;flex-direction:column}
+html.modo-sol .resumo-num div{border:1.5px solid #FFF}
+.resumo-num b{font-family:"Space Grotesk",Inter,sans-serif;font-size:2rem;line-height:1}
+.resumo-num span{font-size:.8125rem;color:var(--muted)}
+.cartao{background:var(--surface);border-radius:14px;padding:1rem;display:flex;flex-direction:column;gap:.6rem}
+html.modo-sol .cartao{border:1.5px solid #FFF}
+.tabela{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.5rem}
+.tabela li{display:flex;justify-content:space-between;gap:.75rem;font-size:.9375rem}
+.tabela li span:last-child{font-weight:600;text-align:right}
+.grande-ok{display:flex;flex-direction:column;gap:.75rem;align-items:flex-start}
+.grande-ok .check{width:3.5rem;height:3.5rem;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center}
+.grande-ok .check svg{width:2rem;height:2rem}
+.grande-ok h1{font-family:"Space Grotesk",Inter,sans-serif;font-size:1.75rem}
+
+/* toast */
+.toast{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(6rem + env(safe-area-inset-bottom,0px));z-index:30;width:calc(100% - 2rem);max-width:24.5rem;background:var(--dark);color:var(--on-dark);border-radius:12px;padding:.75rem 1rem;box-shadow:0 8px 24px rgba(0,0,0,.25);font-weight:600}
+.toast[hidden]{display:none}
+
+/* ---------- palco de demonstração ---------- */
+body.demo{background:#D5DEDB;min-height:100vh;display:flex;flex-direction:column}
+.demo-barra{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:.6rem 1.25rem;background:#12201E;color:#FFF;font-family:Inter,system-ui,sans-serif;font-size:16px}
+.demo-barra .nome{font-weight:700;font-size:15px}
+.demo-barra .nome span{font-weight:400;color:#C9D6D3}
+.alternar{display:inline-flex;background:#2A3A37;border-radius:12px;padding:4px;gap:4px}
+.alternar button{min-height:40px;padding:0 14px;border:0;border-radius:9px;background:transparent;color:#E4EAE8;font:600 14px Inter,system-ui,sans-serif;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.alternar button svg{width:18px;height:18px}
+.alternar button[aria-pressed="true"]{background:#FFF;color:#12201E}
+.alternar button:focus-visible{outline:3px solid #F2B35B;outline-offset:2px}
+.palco{flex:1;display:flex;justify-content:center;align-items:flex-start;padding:24px 16px 32px;gap:40px}
+.palco[hidden]{display:none}
+.escala{width:414px;flex-shrink:0}
+.celular{width:414px;height:868px;padding:12px;border-radius:56px;background:#101716;box-shadow:0 0 0 2px #3A4644 inset,0 30px 60px rgba(18,32,30,.35);transform-origin:top center;position:relative}
+.celular::before{content:"";position:absolute;top:20px;left:50%;transform:translateX(-50%);width:110px;height:30px;border-radius:20px;background:#101716;z-index:50}
+.moldura{position:relative;width:390px;height:844px;border-radius:44px;overflow:hidden;background:var(--ground);transform:translateZ(0)}
+.tela{position:absolute;inset:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}
+.tela::-webkit-scrollbar{display:none}
+.tela .cab{padding-top:3.25rem}
+.legenda{max-width:280px;font-family:Inter,system-ui,sans-serif;font-size:15px;line-height:1.5;color:#12201E;padding-top:40px;display:flex;flex-direction:column;gap:12px}
+.legenda h2{font-family:"Space Grotesk",Inter,sans-serif;font-size:24px}
+.legenda p{color:#3B4A47}
+.legenda ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;color:#3B4A47}
+@media (max-width:860px){ .legenda{display:none} }
+@media (max-width:500px){
+  .palco{padding:0}
+  .escala{width:100%;height:auto !important}
+  .celular{width:100%;height:calc(100dvh - var(--barra-demo,56px));padding:0;border-radius:0;box-shadow:none;transform:none !important;background:transparent}
+  .celular::before{display:none}
+  .moldura{width:100%;height:100%;border-radius:0}
+  .tela .cab{padding-top:1rem}
+}
+
+/* ---------- painel do gestor ---------- */
+.painel{flex:1;display:flex;flex-wrap:wrap;background:#EEF2F0;color:#12201E;font-family:Inter,system-ui,sans-serif;font-size:16px;line-height:1.45;min-height:calc(100vh - 56px)}
+.painel[hidden]{display:none}
+.p-nav{flex:1 1 220px;max-width:250px;background:#12201E;color:#FFF;padding:24px 14px;display:flex;flex-direction:column;gap:24px}
+.p-nav .m{padding:0 10px;display:flex;flex-direction:column;gap:2px}
+.p-nav .m b{font-family:"Space Grotesk",Inter,sans-serif;font-size:19px}
+.p-nav .m span{font-size:13px;color:#A9B8B5}
+.p-nav ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.p-nav a{display:flex;align-items:center;min-height:44px;padding:0 12px;border-radius:10px;color:#D5DFDD;text-decoration:none;font-size:15px}
+.p-nav a[aria-current="page"]{background:#0E5E5A;color:#FFF;font-weight:600}
+.p-nav a:hover{color:#FFF}
+.p-nav .quem{margin-top:auto;padding:0 10px;font-size:13px;color:#A9B8B5}
+.p-main{flex:999 1 600px;min-width:0;padding:28px 32px 40px;display:flex;flex-direction:column;gap:20px}
+.p-topo{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.p-topo h1{font-family:"Space Grotesk",Inter,sans-serif;font-size:32px}
+.p-topo .sub{font-size:14px;color:#4A5A57}
+.p-btns{display:flex;gap:10px;flex-wrap:wrap}
+.p-btn{min-height:44px;padding:0 16px;border-radius:10px;border:1.5px solid #B9C6C3;background:#FFF;color:#12201E;font:600 14px Inter,sans-serif;cursor:pointer}
+.p-btn.pri{background:#0E5E5A;border-color:#0E5E5A;color:#FFF}
+.p-btn.lar{background:#9A3F07;border-color:#9A3F07;color:#FFF}
+.p-btn.lar-sec{border-color:#C98A3A;color:#7A3106}
+.p-alerta{background:#FFF7EC;border:1.5px solid #E39A3B;border-radius:14px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+.p-alerta b{display:block;color:#7A3106;font-size:14px}
+.p-alerta span{font-size:14px;color:#4A2A10}
+.p-grade{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start}
+.p-tab{flex:3 1 520px;min-width:0;background:#FFF;border-radius:16px;padding:6px 0;overflow-x:auto}
+.p-tab table{width:100%;min-width:600px;border-collapse:collapse;font-size:14px}
+.p-tab th{text-align:left;padding:12px 16px;font-size:12px;color:#4A5A57;font-weight:600}
+.p-tab td{padding:14px 16px;border-top:1px solid #E4EAE8;vertical-align:top}
+.p-tab tr.sel td{background:#F3F8F7}
+.p-tab td:first-child{font-weight:600}
+.chip{display:inline-block;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.chip.and{color:#0E5E5A;background:#DCEDEA}.chip.ag{color:#3B4A47;background:#E4EAE8}.chip.can{color:#FFF;background:#5B6664}.chip.emb{color:#0E5E5A;background:#DCEDEA}.chip.nao{color:#FFF;background:#5B6664}.chip.pen{color:#3B4A47;background:#E4EAE8}
+.p-det{flex:1 1 320px;min-width:0;display:flex;flex-direction:column;gap:16px}
+.p-card{background:#FFF;border-radius:16px;padding:18px 20px;display:flex;flex-direction:column;gap:12px}
+.p-card h2{font-size:16px}
+.p-card .sub{font-size:13px;color:#4A5A57}
+.p-conexao{display:flex;gap:10px;align-items:flex-start;font-size:14px;border-radius:10px;padding:10px 12px;background:#DCEDEA}
+.p-conexao.off{background:#FFF7EC;color:#7A3106}
+.p-conexao::before{content:"";width:10px;height:10px;border-radius:50%;background:#0E5E5A;margin-top:6px;flex-shrink:0}
+.p-conexao.off::before{background:#C2410C}
+.p-pacs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.p-pacs li{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:14px}
+.p-feed{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;font-size:14px}
+.p-feed li{display:flex;gap:10px;align-items:baseline;padding:4px 8px;margin:0 -8px;border-radius:8px;transition:background-color .8s}
+.p-feed li.novo{background:#FFF7EC}
+.tag-novo{font-size:11px;font-weight:700;color:#7A3106;border:1.5px solid #E39A3B;border-radius:999px;padding:0 6px;margin-left:6px;white-space:nowrap}
+.p-feed li:not(.novo) .tag-novo{display:none}
+.p-feed time{color:#4A5A57;font-variant-numeric:tabular-nums;width:42px;flex-shrink:0}
+.p-feed .alt{color:#7A3106}
+.p-vazio{font-size:14px;color:#4A5A57}
+.p-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#12201E;color:#FFF;border-radius:12px;padding:12px 16px;font:600 14px Inter,sans-serif;z-index:80}
+.p-toast[hidden]{display:none}
+@media (max-width:700px){ .p-nav{max-width:none;flex-basis:100%;padding:14px} .p-nav ul{flex-direction:row;flex-wrap:wrap} .p-nav .quem{display:none} .p-main{padding:20px 16px} }
+
+@media (prefers-reduced-motion:no-preference){
+  .entra{animation:entra .35s ease-out}
+  @keyframes entra{from{transform:translateY(-.5rem);opacity:0}to{transform:none;opacity:1}}
+}
+</style>
+</head>
+<body class="demo">
+<a class="pular" href="#conteudo">Pular para a lista</a>
+<header class="demo-barra" id="demo-barra">
+  <span class="nome">Transporte Saúde <span>· protótipo</span></span>
+  <div class="alternar" role="group" aria-label="Ver o protótipo como">
+    <button type="button" id="ver-motorista" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/></svg>App do motorista</button>
+    <button type="button" id="ver-gestor" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Painel do gestor</button>
+  </div>
+</header>
+
+<div class="palco" id="palco">
+  <div class="escala" id="escala">
+    <div class="celular" id="celular">
+      <div class="moldura" id="moldura">
+        <div class="tela" id="tela">
+          <div class="app">
+            <header class="cab" id="cab"></header>
+            <div class="faixa" id="faixa-sinal" role="status" hidden></div>
+            <main id="conteudo" tabindex="-1"></main>
+          </div>
+        </div>
+        <div class="barra" id="barra" hidden></div>
+        <div class="toast" id="toast" role="status" hidden></div>
+        <div class="veu" id="veu" hidden></div>
+<!-- não embarque -->
+        <dialog id="dlg-nao" aria-labelledby="nao-titulo">
+  <form class="dlg" id="form-nao" novalidate>
+    <span class="alca" aria-hidden="true"></span>
+    <div class="coluna" style="gap:.35rem">
+      <span class="sobre">Não embarque</span>
+      <h2 id="nao-titulo">Por que o paciente não embarcou?</h2>
+      <p class="pac-sub">O motivo vai para o histórico e para a secretaria.</p>
+    </div>
+    <fieldset id="grupo-motivo" aria-describedby="erro-motivo">
+      <legend class="sr-only">Motivo</legend>
+      <p class="msg-erro" id="erro-motivo" hidden>Escolha um motivo para registrar.</p>
+      <div class="opcoes">
+        <label class="opcao"><input type="radio" name="motivo" value="Não atendeu após 4 tentativas de contato">Não atendeu depois de 4 tentativas</label>
+        <label class="opcao"><input type="radio" name="motivo" value="Paciente desistiu">Paciente desistiu</label>
+        <label class="opcao"><input type="radio" name="motivo" value="Não estava no local combinado">Não estava no local combinado</label>
+        <label class="opcao"><input type="radio" name="motivo" value="Outro">Outro motivo</label>
+      </div>
+    </fieldset>
+    <label class="campo" id="campo-outro" hidden>Qual foi o motivo?
+      <span class="d">Escreva em poucas palavras.</span>
+      <textarea id="txt-outro" maxlength="120" aria-describedby="erro-outro"></textarea>
+      <span class="msg-erro" id="erro-outro" hidden>Escreva o motivo para registrar.</span>
+    </label>
+    <p class="nota" id="nota-volta" hidden></p>
+    <div class="coluna">
+      <button type="submit" class="btn grande">Registrar não embarque</button>
+      <button type="button" class="btn sec" id="nao-cancelar">Voltar sem registrar</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- confirmar seguir viagem -->
+        <dialog id="dlg-seguir" aria-labelledby="seguir-titulo">
+  <div class="dlg">
+    <span class="alca" aria-hidden="true"></span>
+    <h2 id="seguir-titulo">Seguir para Vacaria?</h2>
+    <div id="seguir-corpo"></div>
+    <div class="coluna">
+      <button type="button" class="btn grande" id="seguir-ok">Sim, seguir viagem</button>
+      <button type="button" class="btn sec" id="seguir-voltar">Voltar para a lista</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- ajustes -->
+        <dialog id="dlg-ajustes" aria-labelledby="aj-titulo">
+  <div class="dlg">
+    <span class="alca" aria-hidden="true"></span>
+    <h2 id="aj-titulo">Ajustes</h2>
+    <fieldset>
+      <legend>Tamanho do texto</legend>
+      <div class="opcoes">
+        <label class="opcao"><input type="radio" name="tam" value="">Padrão</label>
+        <label class="opcao" style="font-size:1.15em"><input type="radio" name="tam" value="texto-grande">Grande</label>
+        <label class="opcao" style="font-size:1.3em"><input type="radio" name="tam" value="texto-muito-grande">Muito grande</label>
+      </div>
+    </fieldset>
+    <label class="opcao"><input type="checkbox" id="aj-sol"><span><b>Modo sol</b><br><span class="pac-sub">Alto contraste para ler sob luz forte.</span></span></label>
+    <button type="button" class="btn" id="aj-ok">Pronto</button>
+    <div class="coluna" style="border-top:1.5px dashed var(--line);padding-top:1rem">
+      <p class="pac-sub"><b>Controles do teste</b> (não fazem parte do app)</p>
+      <label class="opcao"><input type="checkbox" id="aj-offline">Simular celular sem sinal</label>
+      <button type="button" class="btn sec" id="aj-reiniciar">Reiniciar protótipo</button>
+    </div>
+  </div>
+</dialog>
+
+      </div>
+    </div>
+  </div>
+  <aside class="legenda" aria-label="Como usar o protótipo">
+    <h2>App do motorista</h2>
+    <p>Use como no celular: toque nos botões e role a tela.</p>
+    <ol>
+      <li>Toque em <b>Iniciar viagem</b>.</li>
+      <li>Registre quem embarcou e quem não embarcou.</li>
+      <li>Toque em <b>Seguir para Vacaria</b>.</li>
+    </ol>
+    <p>Em <b>Ajustes</b> ficam o texto grande, o modo sol e os controles do teste (sem sinal e reiniciar). O que o motorista registra aparece no <b>Painel do gestor</b>.</p>
+  </aside>
+</div>
+
+<div class="painel" id="painel" hidden></div>
+<div class="p-toast" id="p-toast" role="status" hidden></div>
+<div class="sr-only" id="anuncio" aria-live="polite"></div>
+<div class="sr-only" id="anuncio-urgente" aria-live="assertive"></div>
+
+<script>
+(function(){
+"use strict";
+function $(s,c){ return (c||document).querySelector(s); }
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+
+var IC = {
+  sino:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>',
+  semSinal:'<svg viewBox="0 0 24 24" fill="none" stroke="#F2B35B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 1l22 22"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.58 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><path d="M12 20h.01"/></svg>',
+  ok:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>',
+  tel:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
+  lista:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>'
+};
+
+/* ---------- estado ---------- */
+function novoEstado(){
+  return {
+    viagem:{situacao:"agendada", saida:null},
+    relogio:5*60+26,
+    pacientes:[
+      {id:"maria", nome:"Maria Aparecida Lopes", acomp:"Pedro Lopes (filho)", local:"Rua Sete de Setembro, 412, Centro", tel:"(54) 99812-3301", destino:"Hospital de Vacaria", hora:"07:30", trechos:"Ida e volta", estado:"pendente"},
+      {id:"joao", nome:"João Fulano", local:"Linha São José, em frente à capela", tel:"(54) 99640-2217", destino:"Clínica de Imagem", hora:"08:00", trechos:"Ida e volta", estado:"pendente"},
+      {id:"teresinha", nome:"Teresinha Borges", local:"Rua Ernesto Alves, 95, Vila Nova", tel:"(54) 99733-5480", destino:"Hospital de Vacaria", hora:"09:00", trechos:"Só ida", voltaOutra:true, estado:"pendente"}
+    ],
+    volta:[{nome:"Ana Ribeiro", local:"Hospital de Vacaria", hora:"15:00"}],
+    alteracao:null, alteracaoFeita:false, offline:false, fila:[], desfazer:null, emViagem:false,
+    servidor:{viagem:"agendada", pac:{maria:"pendente",joao:"pendente",teresinha:"pendente"}, motivos:{}, semAcomp:{}, eventos:[], ultimaSync:"05:20", revisarVolta:false, semSinalDesde:null}
+  };
+}
+var E = novoEstado();
+function hora(){ var h=Math.floor(E.relogio/60), m=E.relogio%60; return String(h).padStart(2,"0")+":"+String(m).padStart(2,"0"); }
+function passa(min){ E.relogio+=min; }
+function pac(id){ return E.pacientes.filter(function(p){return p.id===id;})[0]; }
+function primeiroNome(p){ return p.nome.split(" ")[0]; }
+function resolvidos(){ return E.pacientes.filter(function(p){ return p.estado!=="pendente"; }).length; }
+function embarcados(){ return E.pacientes.filter(function(p){ return p.estado==="embarcado"; }); }
+function anunciar(t,urg){ var a=$(urg?"#anuncio-urgente":"#anuncio"); a.textContent=""; setTimeout(function(){ a.textContent=t; },60); }
+var tt=null;
+function toast(t){ var e=$("#toast"); e.textContent=t; e.hidden=false; clearTimeout(tt); tt=setTimeout(function(){ e.hidden=true; },4000); }
+
+function registrar(ev){
+  ev.hora=hora();
+  if (E.offline){ E.fila.push(ev); } else { entregar([ev]); E.servidor.ultimaSync=ev.hora; }
+  return ev;
+}
+function primeiroNomeAcomp(p){ return p.acomp ? p.acomp.split(" ")[0] : ""; }
+function entregar(lista){
+  var S=E.servidor;
+  lista.forEach(function(ev){
+    if (ev.viagem) S.viagem=ev.viagem;
+    if (ev.pid){ S.pac[ev.pid]=ev.estado; S.semAcomp[ev.pid]=!!ev.semAcomp; if (ev.motivo) S.motivos[ev.pid]=ev.motivo; else delete S.motivos[ev.pid]; }
+    if (ev.revisar!==undefined) S.revisarVolta=ev.revisar;
+    S.eventos.unshift({hora:ev.hora, txt:ev.txt, tipo:ev.tipo||"", novo:true});
+  });
+  renderPainel();
+}
+
+/* ---------- cabeçalho e faixa ---------- */
+function renderCab(){
+  var st = E.emViagem ? "Em viagem" : (E.viagem.situacao==="andamento" ? "Registrada às "+E.viagem.saida : (E.offline ? "Lista salva 05:20" : "Atualizado 05:20"));
+  $("#cab").innerHTML =
+    '<div class="cab-topo"><span class="cab-data">Terça, 17 de novembro</span><button type="button" class="btn-ajustes" id="abrir-ajustes" aria-haspopup="dialog"><span aria-hidden="true">Aa</span> Ajustes</button></div>'
+  + '<div class="coluna" style="gap:.15rem"><span class="rot">Sua viagem de hoje para</span><h1 id="titulo" tabindex="-1">Vacaria</h1></div>'
+  + '<div class="cab-grade"><div class="cab-bloco"><span class="r">Saída de Esmeralda</span><span class="v">05:30</span><span class="s">'+esc(st)+'</span></div>'
+  + '<div class="cab-bloco"><span class="r">Veículo</span><span class="v">Spin · IXY2B34</span><span class="s">7 lugares</span></div></div>';
+  $("#abrir-ajustes").addEventListener("click", abrirAjustes);
+  var f=$("#faixa-sinal");
+  if (E.offline){
+    var n=E.fila.length;
+    f.className="faixa"; f.hidden=false;
+    f.innerHTML=IC.semSinal+'<div><strong>Sem sinal</strong><span class="d">Pode continuar registrando. '+(n?n+(n===1?' registro guardado':' registros guardados')+' no celular, enviado'+(n===1?'':'s')+' quando o sinal voltar.':'Tudo fica guardado no celular até o sinal voltar.')+'</span></div>';
+  } else if (f.dataset.enviados){
+    f.className="faixa ok"; f.hidden=false;
+    f.innerHTML='<div><strong>Sinal de volta</strong><span class="d">'+f.dataset.enviados+' enviado'+(f.dataset.enviados==="1 registro"?'':'s')+' para a secretaria.</span></div>';
+  } else { f.hidden=true; }
+}
+
+/* ---------- lista do dia ---------- */
+function cartao(p){
+  var selo, corpo="";
+  if (p.estado==="embarcado") selo='<span class="selo embarcado">Embarcou '+p.horaReg+'</span>';
+  else if (p.estado==="nao") selo='<span class="selo nao">Não embarcou</span>';
+  else if (E.alteracao && E.alteracao.id===p.id && !E.alteracao.lida) selo='<span class="selo alt">Alterado</span>';
+  else selo='<span class="selo pendente">Aguardando</span>';
+
+  var info = '<div class="pac-info">';
+  if (p.horaAntiga) info += '<span class="horario-mudou">'+esc(p.destino)+': <s aria-label="antes '+p.horaAntiga+'">'+p.horaAntiga+'</s> <span aria-hidden="true">→</span> <b>'+p.hora+'</b></span>';
+  else info += '<span><strong>'+esc(p.destino)+'</strong> às '+p.hora+'</span>';
+  info += p.trechos==="Só ida" ? '<span class="trecho-alerta">Só ida</span>' : '<span>'+p.trechos+'</span>';
+  info += '</div>';
+
+  if (p.estado==="pendente"){
+    corpo = '<div class="pac-info"><span>Embarca em: <strong>'+esc(p.local)+'</strong></span></div>'
+      + '<a class="ligar" href="tel:'+p.tel.replace(/\D/g,"")+'">'+IC.tel+' Ligar para '+primeiroNome(p)+' · '+p.tel+'</a>';
+    if (E.viagem.situacao==="andamento"){
+      corpo += '<div class="acoes2"><button type="button" class="btn" data-a="embarcou" data-id="'+p.id+'">Embarcou</button><button type="button" class="btn sec" data-a="nao" data-id="'+p.id+'">Não embarcou</button></div>';
+    }
+  } else if (p.estado==="nao"){
+    corpo = '<p class="pac-sub">Motivo: '+esc(p.motivo)+'</p>';
+  }
+  if (p.estado==="pendente" && p.acomp && E.viagem.situacao==="andamento"){
+    corpo += '<button type="button" class="btn sec" data-a="embarcou-so" data-id="'+p.id+'">Embarcou sem '+esc(primeiroNomeAcomp(p))+'</button>';
+  }
+  if (E.desfazer && E.desfazer.id===p.id){
+    corpo += '<div class="linha-desfazer"><span>Registrado às '+p.horaReg+'.</span><button type="button" class="btn link" data-a="desfazer" data-id="'+p.id+'">Desfazer</button></div>';
+  }
+  var cls = "pac" + (E.alteracao && E.alteracao.id===p.id && !E.alteracao.lida ? " alterado" : "");
+  return '<li class="'+cls+'" id="pac-'+p.id+'"><div class="pac-topo"><div class="coluna" style="gap:.15rem"><h3 class="pac-nome">'+esc(p.nome)+'</h3>'
+    + (p.acomp?(p.semAcomp?'<span class="pac-sub">Sem acompanhante: '+esc(p.acomp)+' não veio</span>':'<span class="pac-sub">Com acompanhante: '+esc(p.acomp)+'</span>'):'')
+    + '</div>'+selo+'</div>'+info+corpo+'</li>';
+}
+
+function telaLista(){
+  var h="";
+  if (E.alteracao && !E.alteracao.lida){
+    var a=E.alteracao;
+    h += '<section class="alteracao entra" aria-labelledby="alt-titulo"><div class="topo"><span class="sino">'+IC.sino+'</span><div><h2 id="alt-titulo" style="font-size:1rem">A secretaria mudou um horário</h2><span class="quem">às '+a.hora+', por Rita (gestora)</span></div></div>'
+      + '<p>'+esc(a.texto)+'</p><button type="button" class="btn" data-a="entendi">Entendi</button></section>';
+  }
+  if (E.viagem.situacao==="agendada"){
+    h += '<section class="cartao" aria-labelledby="ini-t"><h2 id="ini-t" style="font-size:1.0625rem">Pronto para sair?</h2><p class="pac-sub">Ao iniciar, a secretaria vê que você saiu e os botões de embarque são liberados.</p><button type="button" class="btn grande" data-a="iniciar">Iniciar viagem</button></section>';
+  }
+  h += '<section class="missoes" aria-labelledby="mis-t"><h2 id="mis-t">'+IC.lista+'Missões do dia (2)</h2><ul><li>Buscar resultados de exames no Laboratório Central</li><li>Entregar malote de documentos no Hospital de Vacaria</li></ul></section>';
+  h += '<section class="coluna" aria-labelledby="pac-t"><div class="titulo-sec"><h2 id="pac-t">Embarques</h2><span>'+resolvidos()+' de '+E.pacientes.length+' registrados</span></div><ul class="lista">';
+  E.pacientes.forEach(function(p){ h+=cartao(p); });
+  h += '</ul></section>';
+  h += '<section class="coluna" aria-labelledby="volta-t"><div class="titulo-sec"><h2 id="volta-t">Buscar na volta</h2></div><ul class="lista">';
+  E.volta.forEach(function(v){ h += '<li class="pac"><div class="pac-topo"><h3 class="pac-nome">'+esc(v.nome)+'</h3><span class="selo volta">Na volta</span></div><div class="pac-info"><span>Retirar no <strong>'+esc(v.local)+'</strong> às '+v.hora+'</span><span class="trecho-volta">Só volta</span></div></li>'; });
+  h += '</ul></section>';
+  return h;
+}
+
+function telaEmViagem(){
+  var emb=embarcados(), nAc=emb.filter(function(p){return p.acomp && !p.semAcomp;}).length;
+  var h='<div class="grande-ok"><span class="check" style="color:var(--on-accent)">'+IC.ok+'</span><h1 tabindex="-1" id="t-ok">Viagem em andamento</h1><p>Os embarques foram '+(E.offline?'guardados no celular e vão para a secretaria quando o sinal voltar.':'enviados para a secretaria.')+'</p></div>';
+  h += '<div class="resumo-num" role="list"><div role="listitem"><b>'+emb.length+'</b><span>embarcaram</span></div><div role="listitem"><b>'+nAc+'</b><span>acompanhante'+(nAc===1?'':'s')+'</span></div><div role="listitem"><b>'+E.pacientes.filter(function(p){return p.estado==="nao";}).length+'</b><span>não embarcaram</span></div></div>';
+  h += '<section class="cartao" aria-labelledby="prox-t"><h2 id="prox-t" style="font-size:1.0625rem">Próximas entregas</h2><ul class="tabela">';
+  emb.slice().sort(function(a,b){return a.hora<b.hora?-1:1;}).forEach(function(p){ h+='<li><span>'+esc(p.nome)+' · '+esc(p.destino)+'</span><span>'+p.hora+'</span></li>'; });
+  h += '</ul></section><p class="pac-sub">A próxima etapa do app (entregas no destino e retiradas para a volta) não faz parte deste protótipo.</p>';
+  h += '<button type="button" class="btn sec" data-a="voltar-lista">Ver a lista do dia</button>';
+  return h;
+}
+
+/* ---------- renderização ---------- */
+function render(foco){
+  renderCab();
+  var main=$("#conteudo");
+  main.innerHTML = E.emViagem ? telaEmViagem() : telaLista();
+  var b=$("#barra");
+  if (!E.emViagem && E.viagem.situacao==="andamento" && resolvidos()===E.pacientes.length){
+    b.hidden=false; b.innerHTML='<button type="button" class="btn grande" data-a="seguir">Seguir para Vacaria</button>';
+  } else { b.hidden=true; b.innerHTML=""; }
+  if (foco){ var el=$(foco); if (el){ el.focus({preventScroll:false}); } }
+}
+
+/* ---------- ações ---------- */
+var undoTimer=null;
+document.addEventListener("click", function(ev){
+  var t=ev.target.closest("[data-a]"); if (!t) return;
+  var a=t.getAttribute("data-a"), id=t.getAttribute("data-id"), p=id?pac(id):null;
+
+  if (a==="iniciar"){
+    passa(4); E.viagem.situacao="andamento"; E.viagem.saida=hora(); registrar({txt:"Saída de Esmeralda registrada", viagem:"andamento"});
+    render('[data-a="embarcou"]'); anunciar("Viagem iniciada às "+E.viagem.saida+". Registre o embarque de cada paciente.");
+  }
+  if (a==="embarcou" || a==="embarcou-so"){
+    var so = a==="embarcou-so";
+    passa(6); p.estado="embarcado"; p.semAcomp=so; p.horaReg=hora();
+    var txt = p.nome+" embarcou"+(so?" sem o acompanhante ("+p.acomp+" não veio)":(p.acomp?" com o acompanhante":""));
+    var evE = registrar({txt:txt, pid:p.id, estado:"embarcado", semAcomp:so, tipo:so?"alt":""});
+    marcarDesfazer(p, evE);
+    render("#pac-"+p.id+' [data-a="desfazer"]');
+    anunciar((so ? p.nome+" embarcou às "+p.horaReg+", sem "+primeiroNomeAcomp(p)+"." : p.nome+" embarcou às "+p.horaReg+".")+" Se foi engano, use Desfazer.");
+    if (!E.alteracaoFeita) agendarAlteracao();
+  }
+  if (a==="nao"){ abrirNao(p); }
+  if (a==="desfazer"){
+    clearTimeout(undoTimer); var evOrig=E.desfazer && E.desfazer.ev; E.desfazer=null; var era=p.estado; p.estado="pendente"; p.motivo=null; p.semAcomp=false;
+    var iFila = evOrig ? E.fila.indexOf(evOrig) : -1;
+    if (iFila>=0) E.fila.splice(iFila,1); /* ainda não saiu do celular: só retira da fila */
+    else registrar({txt:"Registro corrigido pelo motorista: "+p.nome+" voltou para Aguardando", pid:p.id, estado:"pendente", revisar:(era==="nao"&&p.voltaOutra)?false:undefined, tipo:"alt"}); /* já entregue: correção (vai pela fila se estiver sem sinal) */
+    render("#pac-"+p.id+' [data-a="embarcou"]'); anunciar("Registro desfeito. "+p.nome+" voltou para Aguardando.");
+  }
+  if (a==="entendi"){
+    E.alteracao.lida=true; render("#pac-"+E.alteracao.id); 
+    var c=$("#pac-"+E.alteracao.id); if (c){ c.setAttribute("tabindex","-1"); c.focus(); }
+    anunciar("Aviso marcado como lido. O novo horário aparece no cartão de "+pac(E.alteracao.id).nome+".");
+  }
+  if (a==="seguir"){ abrirSeguir(); }
+  if (a==="voltar-lista"){ E.emViagem=false; render("#titulo"); }
+});
+
+function marcarDesfazer(p, ev){
+  clearTimeout(undoTimer); E.desfazer={id:p.id, ev:ev};
+  undoTimer=setTimeout(function(){
+    if (E.desfazer && E.desfazer.id===p.id){
+      var foco=document.activeElement && document.activeElement.getAttribute("data-a")==="desfazer";
+      E.desfazer=null; render(foco?"#pac-"+p.id:null);
+      if (foco){ var c=$("#pac-"+p.id); c.setAttribute("tabindex","-1"); c.focus(); }
+    }
+  }, 10000);
+}
+
+function agendarAlteracao(){
+  E.alteracaoFeita=true;
+  setTimeout(function(){
+    if (E.offline){ E.alteracaoPendente=true; return; }
+    aplicarAlteracao();
+  }, 2500);
+}
+function aplicarAlteracao(){
+  E.alteracaoPendente=false;
+  var j=pac("joao");
+  j.horaAntiga=j.hora; j.hora="10:30";
+  E.servidor.eventos.unshift({hora:hora(), txt:"Rita alterou o horário de João Fulano: 08:00 → 10:30. Motorista avisado.", tipo:"", novo:true}); renderPainel();
+  E.alteracao={id:"joao", hora:hora(), lida:false, texto:"João Fulano agora deve estar na Clínica de Imagem às 10:30 (antes 08:00). O local de embarque continua o mesmo."};
+  var foco=document.activeElement, sel=foco && foco.getAttribute("data-a") ? '[data-a="'+foco.getAttribute("data-a")+'"]'+(foco.getAttribute("data-id")?'[data-id="'+foco.getAttribute("data-id")+'"]':'') : null;
+  render(sel);
+  anunciar("Aviso da secretaria: o horário de João Fulano mudou de 08:00 para 10:30.", true);
+  if (navigator.vibrate) try{ navigator.vibrate([120,80,120]); }catch(e){}
+}
+
+/* ---------- modais dentro do celular ---------- */
+var aberto=null;
+function abrir(d){
+  aberto=d; d.show(); $("#veu").hidden=false;
+  ["#tela","#barra","#demo-barra"].forEach(function(q){ $(q).inert=true; });
+}
+function fechar(d){
+  d.close(); d.style.transform=""; aberto=null; $("#veu").hidden=true;
+  ["#tela","#barra","#demo-barra"].forEach(function(q){ $(q).inert=false; });
+}
+/* fecha a janela aberta sem registrar nada e devolve o foco para quem a abriu (Esc, toque fora, arrastar a alça) */
+function fecharAtual(){
+  if (!aberto) return;
+  var d=aberto; fechar(d);
+  if (d.id==="dlg-ajustes") $("#abrir-ajustes").focus();
+  else if (d.id==="dlg-nao" && alvoNao){ var b=$("#pac-"+alvoNao.id+' [data-a="nao"]'); if (b) b.focus(); }
+  else { var s2=$('[data-a="seguir"]'); if (s2) s2.focus(); }
+}
+document.addEventListener("keydown", function(ev){ if (ev.key==="Escape" && aberto) fecharAtual(); });
+$("#veu").addEventListener("click", fecharAtual);
+/* arrastar a alça para baixo fecha a janela, como nas folhas inferiores do Android */
+Array.prototype.forEach.call(document.querySelectorAll("dialog .alca"), function(alca){
+  var d=alca.closest("dialog"), y0=null, dy=0;
+  alca.addEventListener("pointerdown", function(ev){ y0=ev.clientY; dy=0; try{ alca.setPointerCapture(ev.pointerId); }catch(e){} });
+  alca.addEventListener("pointermove", function(ev){
+    if (y0===null) return;
+    dy=Math.max(0, ev.clientY-y0);
+    d.style.transform="translateY("+(dy/escalaAtual)+"px)";
+  });
+  function soltar(){
+    if (y0===null) return;
+    y0=null;
+    if (dy>70) fecharAtual(); else d.style.transform="";
+  }
+  alca.addEventListener("pointerup", soltar);
+  alca.addEventListener("pointercancel", soltar);
+});
+
+/* ---------- não embarque ---------- */
+var dlgN=$("#dlg-nao"), alvoNao=null;
+function abrirNao(p){
+  alvoNao=p;
+  $("#form-nao").reset();
+  $("#nao-titulo").textContent="Por que "+primeiroNome(p)+" não embarcou?";
+  $("#erro-motivo").hidden=true; $("#grupo-motivo").classList.remove("erro");
+  $("#campo-outro").hidden=true; $("#erro-outro").hidden=true; $("#txt-outro").removeAttribute("aria-invalid");
+  var nv=$("#nota-volta");
+  if (p.voltaOutra){ nv.hidden=false; nv.textContent="A volta de "+primeiroNome(p)+" está em outro carro. A secretaria será avisada para rever essa volta."; }
+  else { nv.hidden=false; nv.textContent="A volta de "+primeiroNome(p)+" nesta viagem também será cancelada."; }
+  abrir(dlgN);
+  $('input[name="motivo"]').focus();
+}
+dlgN.addEventListener("change", function(ev){
+  if (ev.target.name==="motivo"){
+    $("#erro-motivo").hidden=true; $("#grupo-motivo").classList.remove("erro");
+    var outro = ev.target.value==="Outro"; $("#campo-outro").hidden=!outro;
+  }
+});
+$("#txt-outro").addEventListener("input", function(){ if (this.value.trim()){ $("#erro-outro").hidden=true; this.removeAttribute("aria-invalid"); } });
+$("#nao-cancelar").addEventListener("click", function(){ fechar(dlgN); var b=$("#pac-"+alvoNao.id+' [data-a="nao"]'); if (b) b.focus(); });
+$("#form-nao").addEventListener("submit", function(ev){
+  ev.preventDefault();
+  var sel=$('input[name="motivo"]:checked', dlgN);
+  if (!sel){ $("#erro-motivo").hidden=false; $("#grupo-motivo").classList.add("erro"); $('input[name="motivo"]').focus(); anunciar("Escolha um motivo para registrar.", true); return; }
+  var motivo=sel.value;
+  if (motivo==="Outro"){
+    var t=$("#txt-outro").value.trim();
+    if (!t){ $("#erro-outro").hidden=false; $("#txt-outro").setAttribute("aria-invalid","true"); $("#txt-outro").focus(); anunciar("Escreva o motivo para registrar.", true); return; }
+    motivo=t;
+  }
+  var p=alvoNao; fechar(dlgN);
+  passa(5); p.estado="nao"; p.motivo=motivo; p.horaReg=hora(); registrar({txt:p.nome+" não embarcou. Motivo: "+motivo, pid:p.id, estado:"nao", motivo:motivo, revisar:p.voltaOutra?true:undefined, tipo:"alt"});
+  marcarDesfazer(p);
+  render("#pac-"+p.id+' [data-a="desfazer"]');
+  anunciar("Não embarque de "+p.nome+" registrado. Se foi engano, use Desfazer.");
+});
+
+/* ---------- seguir viagem ---------- */
+var dlgS=$("#dlg-seguir");
+function abrirSeguir(){
+  var emb=embarcados(), nao=E.pacientes.filter(function(p){return p.estado==="nao";});
+  var pessoas=emb.length+emb.filter(function(p){return p.acomp && !p.semAcomp;}).length;
+  var h='<ul class="tabela">';
+  emb.forEach(function(p){ h+='<li><span>'+esc(p.nome)+(p.acomp?(p.semAcomp?' (sem acompanhante)':' + acompanhante'):'')+'</span><span>Embarcou</span></li>'; });
+  nao.forEach(function(p){ h+='<li><span>'+esc(p.nome)+'</span><span>Não embarcou</span></li>'; });
+  h+='</ul>';
+  if (pessoas===0) h+='<p class="nota" style="margin-top:.75rem"><b>Nenhum paciente embarcou.</b> A viagem ainda tem as missões do dia. Se tiver dúvida, ligue para a secretaria antes de seguir.</p>';
+  else h+='<p style="margin-top:.75rem"><b>'+pessoas+' '+(pessoas===1?'pessoa':'pessoas')+' no carro, além de você.</b> Confira se está todo mundo antes de seguir.</p>';
+  if (E.alteracao && !E.alteracao.lida) h+='<p class="nota" style="margin-top:.75rem">Você ainda não leu o aviso da secretaria sobre o horário de João.</p>';
+  $("#seguir-corpo").innerHTML=h;
+  abrir(dlgS); $("#seguir-ok").focus();
+}
+$("#seguir-voltar").addEventListener("click", function(){ fechar(dlgS); $('[data-a="seguir"]').focus(); });
+$("#seguir-ok").addEventListener("click", function(){
+  fechar(dlgS); clearTimeout(undoTimer); E.desfazer=null; E.emViagem=true; registrar({txt:"Motorista seguiu para Vacaria", viagem:"viagem"});
+  render("#t-ok"); $("#tela").scrollTop=0;
+});
+
+/* ---------- ajustes ---------- */
+var dlgA=$("#dlg-ajustes"), raiz=document.documentElement, modo="motorista";
+function lerAj(){ try{ return JSON.parse(localStorage.getItem("transporte-ajustes")||"{}"); }catch(e){ return {}; } }
+var aj=lerAj();
+function aplicarAj(){
+  raiz.classList.remove("texto-grande","texto-muito-grande","modo-sol");
+  if (modo==="gestor") return;
+  if (aj.tam) raiz.classList.add(aj.tam);
+  if (aj.sol) raiz.classList.add("modo-sol");
+  try{ localStorage.setItem("transporte-ajustes", JSON.stringify(aj)); }catch(e){}
+}
+aplicarAj();
+function abrirAjustes(){
+  dlgA.querySelectorAll('input[name="tam"]').forEach(function(r){ r.checked = r.value===(aj.tam||""); });
+  $("#aj-sol").checked=!!aj.sol; $("#aj-offline").checked=E.offline;
+  abrir(dlgA); (dlgA.querySelector('input[name="tam"]:checked')).focus();
+}
+dlgA.addEventListener("change", function(ev){
+  if (ev.target.name==="tam"){ aj.tam=ev.target.value; aplicarAj(); }
+  if (ev.target.id==="aj-sol"){ aj.sol=ev.target.checked; aplicarAj(); }
+  if (ev.target.id==="aj-offline"){ mudarSinal(ev.target.checked); }
+});
+function mudarSinal(off){
+  var f=$("#faixa-sinal");
+  if (off){ E.offline=true; E.fila=[]; E.servidor.semSinalDesde=hora(); delete f.dataset.enviados; renderPainel(); }
+  else {
+    var n=E.fila.length; E.offline=false;
+    var lote=E.fila.slice().sort(function(a,b){ return a.hora<b.hora?-1:1; }); /* RN15: na ordem da hora do aparelho */
+    E.servidor.semSinalDesde=null; E.servidor.ultimaSync=hora();
+    if (lote.length) entregar(lote); else renderPainel();
+    if (n) f.dataset.enviados = n+(n===1?" registro":" registros"); else delete f.dataset.enviados;
+    E.fila=[];
+    if (E.alteracaoPendente) setTimeout(aplicarAlteracao, 1200);
+    setTimeout(function(){ delete f.dataset.enviados; renderCab(); }, 6000);
+  }
+  render();
+  anunciar(off ? "Sem sinal. Seus registros ficam guardados no celular." : "Sinal de volta. Registros enviados para a secretaria.");
+}
+function fecharAjustes(){ fechar(dlgA); $("#abrir-ajustes").focus(); }
+$("#aj-ok").addEventListener("click", fecharAjustes);
+$("#aj-reiniciar").addEventListener("click", function(){
+  clearTimeout(undoTimer); E=novoEstado(); delete $("#faixa-sinal").dataset.enviados; renderPainel();
+  fechar(dlgA); render("#titulo"); $("#tela").scrollTop=0; toast("Protótipo reiniciado.");
+});
+
+/* ---------- painel do gestor ---------- */
+function chipPac(st){
+  return {pendente:'<span class="chip pen">Aguardando</span>', embarcado:'<span class="chip emb">Embarcou</span>', nao:'<span class="chip nao">Não embarcou</span>'}[st];
+}
+function renderPainel(){
+  var el=$("#painel"); if (el.hidden) return;
+  var S=E.servidor, nomes={maria:"Maria Aparecida Lopes",joao:"João Fulano",teresinha:"Teresinha Borges"};
+  var cont={pendente:0,embarcado:0,nao:0}; Object.keys(S.pac).forEach(function(k){ cont[S.pac[k]]++; });
+  var sit = S.viagem==="agendada" ? '<span class="chip ag">Agendada</span>' : '<span class="chip and">'+(S.viagem==="viagem"?'A caminho':'Em andamento')+'</span>';
+  var partes=[]; if (cont.embarcado) partes.push(cont.embarcado+(cont.embarcado===1?' embarcou':' embarcaram')); if (cont.nao) partes.push(cont.nao+(cont.nao===1?' não embarcou':' não embarcaram')); if (cont.pendente) partes.push(cont.pendente+' aguardando');
+  var resumo = S.viagem==="agendada" ? '3 pacientes, 1 acompanhante' : partes.join(' · ');
+  var h='<nav class="p-nav" aria-label="Menu do painel"><div class="m"><b>Transporte Saúde</b><span>Secretaria de Saúde · Esmeralda</span></div><ul>'
+   + '<li><a href="#gestor" aria-current="page">Viagens</a></li><li><a href="#gestor" data-p="fora">Pacientes</a></li><li><a href="#gestor" data-p="fora">Motoristas</a></li><li><a href="#gestor" data-p="fora">Veículos</a></li><li><a href="#gestor" data-p="fora">Histórico</a></li></ul><span class="quem">Rita · gestora</span></nav>';
+  h+='<main class="p-main" id="p-main" tabindex="-1"><div class="p-topo"><div><p class="sub">Terça, 17 de novembro · atualizado às '+hora()+'</p><h1 id="p-titulo" tabindex="-1">Viagens de hoje</h1></div>'
+   + '<div class="p-btns"><button type="button" class="p-btn" data-p="fora">Nova missão</button><button type="button" class="p-btn pri" data-p="fora">Nova viagem</button></div></div>';
+  if (S.revisarVolta){
+    h+='<section class="p-alerta" role="alert"><div><b>Revisar volta</b><span>Teresinha Borges não embarcou na ida (motivo: '+esc(S.motivos.teresinha||"")+'). A volta dela está em outra viagem.</span></div><div class="p-btns"><button type="button" class="p-btn lar" data-p="fora">Cancelar a volta</button></div></section>';
+  }
+  h+='<section class="p-alerta"><div><b>Volta sem viagem definida</b><span>Luiz Carvalho vai só de ida a Passo Fundo (viagem das 04:45) e ainda não tem volta.</span></div><div class="p-btns"><button type="button" class="p-btn lar-sec" data-p="fora">Sem retorno previsto</button><button type="button" class="p-btn lar" data-p="fora">Incluir em outra viagem</button></div></section>';
+  h+='<div class="p-grade"><section class="p-tab" aria-label="Viagens de hoje"><table><thead><tr><th scope="col">Destino</th><th scope="col">Saída</th><th scope="col">Motorista e veículo</th><th scope="col">Pacientes</th><th scope="col">Situação</th></tr></thead><tbody>'
+   + '<tr class="sel"><td>Vacaria</td><td>05:30</td><td>Carlos Menezes<br>Spin IXY2B34</td><td>'+resumo+'</td><td>'+sit+'</td></tr>'
+   + '<tr><td>Passo Fundo</td><td>04:45</td><td>Lucas Prado<br>Van JZK4C21</td><td>6 embarcaram de 7</td><td><span class="chip and">Em andamento</span></td></tr>'
+   + '<tr><td>Vacaria</td><td>13:00</td><td>Sérgio Dal Molin<br>Gol IWE7A09</td><td>3 aguardando</td><td><span class="chip ag">Agendada</span></td></tr>'
+   + '<tr><td>Lagoa Vermelha</td><td>07:00</td><td>—</td><td>—</td><td><span class="chip can">Cancelada</span></td></tr></tbody></table></section>';
+  h+='<div class="p-det"><section class="p-card" aria-labelledby="det-t"><div><h2 id="det-t">Vacaria · saída 05:30</h2><p class="sub">Carlos Menezes · Spin IXY2B34</p></div>';
+  h+= S.semSinalDesde ? '<p class="p-conexao off" role="status">Motorista sem sinal desde '+S.semSinalDesde+'. Pode haver registros ainda não recebidos; espere antes de cancelar ou transferir algo desta viagem.</p>'
+                      : '<p class="p-conexao" role="status">Motorista conectado. Última sincronização às '+S.ultimaSync+'.</p>';
+  h+='<ul class="p-pacs">'; Object.keys(S.pac).forEach(function(k){ h+='<li><span>'+nomes[k]+(k==="maria"?(S.semAcomp.maria?' · acompanhante não veio':' + acompanhante'):'')+'</span>'+chipPac(S.pac[k])+'</li>'; }); h+='<li><span>Ana Ribeiro (só volta, 15:00)</span><span class="chip pen">Na volta</span></li></ul></section>';
+  h+='<section class="p-card" aria-labelledby="feed-t"><div><h2 id="feed-t">Ao vivo</h2><p class="sub">Checks do motorista e alterações, do mais recente ao mais antigo</p></div>';
+  if (!S.eventos.length) h+='<p class="p-vazio">Nada registrado ainda. Inicie a viagem no app do motorista e os registros aparecem aqui.</p>';
+  else { h+='<ol class="p-feed">'; S.eventos.forEach(function(e){ h+='<li class="'+(e.novo?'novo':'')+'"><time>'+e.hora+'</time><span class="'+e.tipo+'">'+esc(e.txt)+'<span class="tag-novo">novo</span></span></li>'; }); h+='</ol>'; }
+  h+='</section></div></div></main>';
+  el.innerHTML=h;
+  S.eventos.forEach(function(e){ e.novo=false; });
+  /* o destaque de "novo" some sozinho depois de alguns segundos, sem redesenhar (não tira o foco da gestora) */
+  clearTimeout(novoTimer);
+  novoTimer=setTimeout(function(){ Array.prototype.forEach.call(el.querySelectorAll(".p-feed li.novo"), function(li){ li.classList.remove("novo"); }); }, 8000);
+}
+var novoTimer=null;
+var ptt=null;
+document.addEventListener("click", function(ev){
+  var t=ev.target.closest('[data-p="fora"]'); if (!t) return;
+  ev.preventDefault();
+  var e=$("#p-toast"); e.textContent="Esta parte do painel não faz parte do protótipo."; e.hidden=false; clearTimeout(ptt); ptt=setTimeout(function(){ e.hidden=true; },3000);
+});
+
+/* ---------- alternar entre motorista e gestor ---------- */
+function mudarModo(m, foco){
+  modo=m;
+  var g = m==="gestor";
+  $("#palco").hidden=g; $("#painel").hidden=!g;
+  $("#ver-motorista").setAttribute("aria-pressed", String(!g));
+  $("#ver-gestor").setAttribute("aria-pressed", String(g));
+  document.title = g ? "Painel do gestor · Transporte Saúde" : "Lista do dia · Transporte Saúde";
+  aplicarAj();
+  if (g){ renderPainel(); if (foco) $("#p-titulo").focus(); }
+  else { ajustarEscala(); if (foco) $("#titulo").focus(); }
+}
+$("#ver-motorista").addEventListener("click", function(){ if (location.hash==="#gestor") history.pushState(null,"",location.pathname+location.search); mudarModo("motorista", true); });
+$("#ver-gestor").addEventListener("click", function(){ if (location.hash!=="#gestor") history.pushState(null,"","#gestor"); mudarModo("gestor", true); });
+window.addEventListener("popstate", function(){ mudarModo(location.hash==="#gestor"?"gestor":"motorista", false); });
+
+var escalaAtual=1;
+function ajustarEscala(){
+  var cel=$("#celular"), esc2=$("#escala");
+  document.body.style.setProperty("--barra-demo", $("#demo-barra").offsetHeight+"px");
+  if (window.innerWidth<=500){ cel.style.transform=""; esc2.style.height=""; escalaAtual=1; return; }
+  var disp=window.innerHeight-$("#demo-barra").offsetHeight-56;
+  var k=Math.min(1, Math.max(.55, disp/868)); escalaAtual=k;
+  cel.style.transform="scale("+k+")"; esc2.style.height=(868*k)+"px"; esc2.style.width=(414*k)+"px";
+  cel.style.marginLeft=((414*k-414)/2)+"px";
+}
+window.addEventListener("resize", ajustarEscala);
+
+render();
+mudarModo(location.hash==="#gestor"?"gestor":"motorista", false);
+})();
+</script>
+</body>
+</html>

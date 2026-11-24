@@ -20,6 +20,10 @@ O repositório já teve um trabalho de IHC sobre a Cantina (recuperação). **El
 | `index.html` | O protótipo inteiro: HTML, CSS e JS num arquivo só, sem build e sem dependências. Só carrega as fontes Inter e Space Grotesk do Google Fonts, com fallback para fontes do sistema. |
 | `README.md` | Como usar o protótipo, a tarefa sugerida para o teste de usabilidade e como publicar. |
 | `CLAUDE.md` | Este arquivo. |
+| `MUDANCAS.md` | Quadro de antes e depois da etapa 6, com as medições. |
+| `v1/index.html` | Cópia congelada da versão "antes" (tag `v1`). **Não editar.** |
+| `antes-depois/` | Imagens de antes e depois das correções de acessibilidade. |
+| `.nojekyll` | Faz o GitHub Pages servir os arquivos como estão. |
 
 Para rodar localmente, abra o `index.html` no navegador ou use `python3 -m http.server` e acesse `http://localhost:8000`. O link direto para o painel do gestor termina em `#gestor`.
 
@@ -138,11 +142,12 @@ As entregas no destino, as retiradas para a volta e a chegada ficam **fora do pr
 - **Elementos posicionados:** a barra inferior, o toast e as janelas usam `position:absolute` dentro de `.moldura` (que tem `transform`), não `fixed`.
 - **Comportamentos temporizados:**
   - A alteração do João dispara **2,5 s depois do primeiro embarque** (`agendarAlteracao()`). Se o celular estiver sem sinal, fica pendente até o sinal voltar.
-  - **Desfazer** fica disponível por **10 s** depois de cada registro.
+  - **Desfazer** não tem prazo (WCAG 2.2.1): fica no último registro até o próximo registro ou até seguir viagem.
 - **Ajustes de leitura:** texto grande (118%), muito grande (135%) e **modo sol** (alto contraste). São classes no `<html>`, aplicadas **só no modo motorista** e salvas em `localStorage` (chave `transporte-ajustes`, sempre dentro de try/catch).
 - **Controles do teste,** separados do app em Ajustes: "Simular celular sem sinal" e "Reiniciar protótipo".
 
 ### Design
+- Foco: `--focus` escuro (`#12201E`) nas áreas claras e amarelo (`#F2B35B`) nas escuras (cabeçalho, aviso, faixa, menu do painel); bordas `--line` `#6F807C` (≥3:1).
 - Cor de destaque `#0E5E5A` (verde-petróleo); fundo `#EEF2F0`; texto `#12201E`.
 - Alerta e alteração em laranja `#9A3F07`/`#7A3106` sobre `#FFF7EC`.
 - "Só volta" em azul `#1D4ED8`.
@@ -170,7 +175,7 @@ As entregas no destino, as retiradas para a volta e a chegada ficam **fora do pr
 | 3. Barreiras → requisitos | Quadro com pelo menos uma barreira de usabilidade, uma de acessibilidade e uma de inclusão, com forma de verificação | A fazer (o protótipo já oferece candidatos: modo sol, botões grandes, motivos prontos, ligar para o paciente, offline) |
 | 4. Protótipo | Link navegável com caminho principal, erro recuperável e confirmação | **Feito** (este repositório) |
 | 5. Avaliar | Heurísticas de Nielsen, teste com pelo menos 3 participantes e verificação WCAG | A fazer (a tarefa sugerida está no README) |
-| 6. Refinar | Corrigir pelo menos 2 problemas (1 de acessibilidade ou inclusão), refazer a verificação e mostrar antes e depois | A fazer |
+| 6. Refinar | Corrigir pelo menos 2 problemas (1 de acessibilidade ou inclusão), refazer a verificação e mostrar antes e depois | **Correções feitas** (ver `MUDANCAS.md`). Falta a dupla ligar cada uma a um achado da etapa 5 |
 
 Para a etapa 6, guarde a versão "antes" (por exemplo, uma tag git ou cópia em `/v1/`) **antes** de aplicar as correções, para poder mostrar a comparação.
 
