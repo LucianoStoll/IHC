@@ -20,9 +20,9 @@ O repositório já teve um trabalho de IHC sobre a Cantina (recuperação). **El
 | `index.html` | O protótipo inteiro: HTML, CSS e JS num arquivo só, sem build e sem dependências. Só carrega as fontes Inter e Space Grotesk do Google Fonts, com fallback para fontes do sistema. |
 | `README.md` | Como usar o protótipo, a tarefa sugerida para o teste de usabilidade e como publicar. |
 | `CLAUDE.md` | Este arquivo. |
-| `MUDANCAS.md` | Quadro de antes e depois da etapa 6, com as medições. |
-| `v1/index.html` | Cópia congelada da versão "antes" (tag `v1`). **Não editar.** |
-| `antes-depois/` | Imagens de antes e depois das correções de acessibilidade. |
+| `MUDANCAS.md` | Quadro das correções C1 a C7 (versão 1 → versão 2), com os problemas PR da etapa 5 e as medições. |
+| `v1/index.html` | Cópia congelada da versão 1, a que passou pela avaliação da etapa 5 (o "antes"). **Não editar.** |
+| `evidencias/` | Imagens de antes e depois das correções C1 a C4 (etapa 6). |
 | `.nojekyll` | Faz o GitHub Pages servir os arquivos como estão. |
 
 Para rodar localmente, abra o `index.html` no navegador ou use `python3 -m http.server` e acesse `http://localhost:8000`. O link direto para o painel do gestor termina em `#gestor`.
@@ -135,19 +135,20 @@ As entregas no destino, as retiradas para a volta e a chegada ficam **fora do pr
 - **Servidor simulado:** `E.servidor` é o que o painel "sabe": situação da viagem, estado de cada paciente, motivos, eventos do feed, `ultimaSync`, `semSinalDesde` e `revisarVolta`.
 - **`registrar(ev)`:** todo check passa por aqui. Com sinal, chama `entregar([ev])`, que atualiza `E.servidor` e redesenha o painel. Sem sinal, o check vai para `E.fila`.
 - **Volta do sinal:** a fila é ordenada pela hora do aparelho (RN15) e entregue de uma vez.
-- **Desfazer:** se o check ainda está na fila (`E.desfazer.ev`), é retirado dela; se já foi entregue, gera um evento de correção, que também passa por `registrar()` (vai pela fila se estiver sem sinal).
-- **Acompanhante:** *Embarcou sem (nome)* registra o embarque com `semAcomp:true`. Não é um estado novo do Embarque; é um detalhe do check de embarque. **Precisa constar no relatório** (RF13), junto com a contagem de pessoas no carro.
+- **Corrigir (`data-a="desfazer"`):** aparece em cada registro até seguir viagem. Se o check do paciente ainda está na fila, é retirado dela; se já foi entregue, gera um evento de correção.
+- **Acompanhante:** *Embarcou sem (nome)* (`data-a="embarcou-sem"`) registra o embarque com `semAcomp:true`. Não é um estado novo do Embarque; é um detalhe do check de embarque. **Precisa constar no relatório** (RF13), junto com a contagem de pessoas no carro.
 - **Renderização:** `render(foco)` redesenha o cabeçalho, a faixa de sinal, a lista e a barra inferior, e move o foco para o seletor indicado. `renderPainel()` só desenha se o painel estiver visível.
 - **Janelas** (`dlg-nao`, `dlg-seguir`, `dlg-ajustes`): são `<dialog>` abertos com `.show()`, não com `showModal()`, para ficarem **dentro do celular**. `abrir()` e `fechar()` cuidam do véu e de `inert` no resto da tela. O Esc, o toque no véu e arrastar a alça para baixo chamam `fecharAtual()`, que devolve o foco a quem abriu a janela.
 - **Elementos posicionados:** a barra inferior, o toast e as janelas usam `position:absolute` dentro de `.moldura` (que tem `transform`), não `fixed`.
 - **Comportamentos temporizados:**
   - A alteração do João dispara **2,5 s depois do primeiro embarque** (`agendarAlteracao()`). Se o celular estiver sem sinal, fica pendente até o sinal voltar.
-  - **Desfazer** não tem prazo (WCAG 2.2.1): fica no último registro até o próximo registro ou até seguir viagem.
+  - **Corrigir** não tem prazo (WCAG 2.2.1; na versão 1 eram 10 s).
 - **Ajustes de leitura:** texto grande (118%), muito grande (135%) e **modo sol** (alto contraste). São classes no `<html>`, aplicadas **só no modo motorista** e salvas em `localStorage` (chave `transporte-ajustes`, sempre dentro de try/catch).
 - **Controles do teste,** separados do app em Ajustes: "Simular celular sem sinal" e "Reiniciar protótipo".
 
 ### Design
-- Foco: `--focus` escuro (`#12201E`) nas áreas claras e amarelo (`#F2B35B`) nas escuras (cabeçalho, aviso, faixa, menu do painel); bordas `--line` `#6F807C` (≥3:1).
+- Foco em dois tons: contorno `#12201E` com margem branca (no modo sol, amarelo com margem preta). Bordas `--line` `#738380` (≥3:1).
+- O aviso da secretaria fica preso no topo (`position:sticky`) até tocar em Entendi.
 - Cor de destaque `#0E5E5A` (verde-petróleo); fundo `#EEF2F0`; texto `#12201E`.
 - Alerta e alteração em laranja `#9A3F07`/`#7A3106` sobre `#FFF7EC`.
 - "Só volta" em azul `#1D4ED8`.
@@ -174,13 +175,13 @@ As entregas no destino, as retiradas para a volta e a chegada ficam **fora do pr
 | 2. Personas | Duas personas, jornada, achados que sustentam cada perfil e hipóteses | A fazer |
 | 3. Barreiras → requisitos | Quadro com pelo menos uma barreira de usabilidade, uma de acessibilidade e uma de inclusão, com forma de verificação | A fazer (o protótipo já oferece candidatos: modo sol, botões grandes, motivos prontos, ligar para o paciente, offline) |
 | 4. Protótipo | Link navegável com caminho principal, erro recuperável e confirmação | **Feito** (este repositório) |
-| 5. Avaliar | Heurísticas de Nielsen, teste com pelo menos 3 participantes e verificação WCAG | A fazer (a tarefa sugerida está no README) |
-| 6. Refinar | Corrigir pelo menos 2 problemas (1 de acessibilidade ou inclusão), refazer a verificação e mostrar antes e depois | **Correções feitas** (ver `MUDANCAS.md`). Falta a dupla ligar cada uma a um achado da etapa 5 |
+| 5. Avaliar | Heurísticas de Nielsen, teste com pelo menos 3 participantes e verificação WCAG | Feito no relatório (13 problemas, PR1 a PR13) |
+| 6. Refinar | Corrigir pelo menos 2 problemas (1 de acessibilidade ou inclusão), refazer a verificação e mostrar antes e depois | **Feito na versão 2** (C1 a C7, ver `MUDANCAS.md` e `evidencias/`). Ficam para depois: PR7 a PR10, PR12 e PR13 |
 
 Para a etapa 6, guarde a versão "antes" (por exemplo, uma tag git ou cópia em `/v1/`) **antes** de aplicar as correções, para poder mostrar a comparação.
 
 Onde estão os elementos exigidos:
-- **Erro recuperável:** Desfazer depois de um registro; não embarque sem motivo; "Outro motivo" sem texto.
+- **Erro recuperável:** Corrigir depois de um registro; não embarque sem motivo; "Outro motivo" sem texto.
 - **Confirmação:** a janela "Seguir para Vacaria?".
 
 ## Como trabalhar neste repositório

@@ -15,14 +15,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --ground:#EEF2F0; --surface:#FFFFFF; --ink:#12201E; --muted:#4A5A57; --line:#6F807C; /* 4,1:1 no branco (WCAG 1.4.11) */
+  --ground:#EEF2F0; --surface:#FFFFFF; --ink:#12201E; --muted:#4A5A57; --line:#738380;
   --accent:#0E5E5A; --accent-hover:#0A4441; --on-accent:#FFFFFF; --accent-soft:#DCEDEA;
   --warn:#7A3106; --warn-strong:#9A3F07; --warn-bg:#FFF7EC; --warn-line:#E39A3B;
   --info:#1D4ED8; --info-bg:#E0E9FB;
   --neutral:#3B4A47; --neutral-bg:#E4EAE8;
   --err:#A61B1B; --err-bg:#FCE9E9;
   --dark:#12201E; --on-dark:#FFFFFF; --dark-muted:#C9D6D3;
-  --focus:#12201E; /* foco escuro nas áreas claras; nas áreas escuras é trocado logo abaixo (WCAG 1.4.11) */
+  --focus:#F2B35B;
   --toque:3.25rem;
 }
 html.texto-grande{font-size:118%}
@@ -42,24 +42,23 @@ h1,h2,h3,p{margin:0}
 h1,h2,h3{line-height:1.15}
 button,input,textarea{font:inherit;color:inherit}
 a{color:var(--accent)}
-:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-.cab,.alteracao,.faixa,.p-nav{--focus:#F2B35B}
-html.modo-sol .cab,html.modo-sol .alteracao,html.modo-sol .faixa{--focus:#000}
+:focus-visible{outline:3px solid #12201E;outline-offset:2px;box-shadow:0 0 0 7px #FFFFFF}
+html.modo-sol :focus-visible{outline-color:#FFE14D;box-shadow:0 0 0 7px #000}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .pular{position:absolute;left:.5rem;top:-5rem;z-index:60;background:var(--dark);color:var(--on-dark);padding:.75rem 1rem;border-radius:10px}
 .pular:focus{top:.5rem}
 
 /* cabeçalho da viagem */
 .cab{background:var(--accent);color:var(--on-accent);padding:calc(1rem + env(safe-area-inset-top,0px)) 1.25rem 1.1rem;display:flex;flex-direction:column;gap:.85rem}
-.cab-topo{display:flex;justify-content:space-between;align-items:center;gap:.5rem}
+.cab-topo{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:.5rem}
 .cab-data{font-size:.875rem;font-weight:500}
 .pilula{font-size:.8125rem;font-weight:600;background:rgba(255,255,255,.16);padding:.25rem .65rem;border-radius:999px}
 html.modo-sol .pilula{background:#000;color:#FFE14D;border:1.5px solid #000}
-.btn-ajustes{min-height:2.75rem;padding:0 .85rem;border-radius:10px;border:1.5px solid rgba(255,255,255,.55);background:transparent;color:inherit;font-weight:600;font-size:.9375rem;cursor:pointer;display:inline-flex;align-items:center;gap:.4rem}
+.btn-ajustes{min-height:var(--toque);padding:0 .85rem;border-radius:10px;border:1.5px solid rgba(255,255,255,.55);background:transparent;color:inherit;font-weight:600;font-size:.9375rem;cursor:pointer;display:inline-flex;align-items:center;gap:.4rem}
 html.modo-sol .btn-ajustes{border-color:#000}
 .cab h1{font-family:"Space Grotesk",Inter,sans-serif;font-size:2rem;font-weight:700}
 .cab .rot{font-size:.875rem;font-weight:500}
-.cab-grade{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem}
+.cab-grade{display:grid;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:.6rem}
 .cab-bloco{background:rgba(255,255,255,.12);border-radius:12px;padding:.6rem .75rem;display:flex;flex-direction:column;gap:.1rem}
 html.modo-sol .cab-bloco{background:#000;color:#FFE14D}
 .cab-bloco .r{font-size:.75rem}
@@ -82,7 +81,7 @@ main:focus{outline:none}
 .titulo-sec span{font-size:.875rem;color:var(--muted)}
 
 /* aviso de alteração */
-.alteracao{background:var(--dark);color:var(--on-dark);border-radius:16px;padding:1rem;display:flex;flex-direction:column;gap:.75rem}
+.alteracao{position:sticky;top:var(--topo-seguro,0px);z-index:5;box-shadow:0 8px 24px rgba(18,32,30,.28);background:var(--dark);color:var(--on-dark);border-radius:16px;padding:1rem;display:flex;flex-direction:column;gap:.75rem}
 .alteracao .topo{display:flex;gap:.75rem;align-items:center}
 .alteracao .sino{color:#12201E;width:2.25rem;height:2.25rem;border-radius:50%;background:#F2B35B;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 html.modo-sol .alteracao .sino{background:#000;color:#FFF}
@@ -102,7 +101,8 @@ html.modo-sol .alteracao .btn{background:#000;color:#FFF;border-color:#000}
 .pac{background:var(--surface);border-radius:14px;padding:1rem;display:flex;flex-direction:column;gap:.7rem;border:1.5px solid transparent}
 html.modo-sol .pac{border-color:#FFF}
 .pac.alterado{background:var(--warn-bg);border:2px solid var(--warn-line)}
-.pac-topo{display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem}
+.pac-topo{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:.5rem}
+.pac-topo > :first-child{flex:1 1 10rem;min-width:0}
 .pac-nome{font-size:1.0625rem;font-weight:700}
 .pac-sub{font-size:.875rem;color:var(--muted)}
 .pac-info{display:flex;flex-wrap:wrap;gap:.25rem 1rem;font-size:.875rem;color:var(--muted)}
@@ -120,18 +120,19 @@ html.modo-sol .selo.nao,html.modo-sol .selo.alt{color:#FFF}
 .horario-mudou{display:flex;align-items:center;gap:.4rem;font-size:.9375rem}
 .horario-mudou s{color:var(--muted)}
 .horario-mudou b{color:var(--warn)}
-.acoes2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem}
+.acoes2{display:flex;flex-wrap:wrap;gap:.5rem}
+.acoes2 > *{flex:1 1 9rem}
 .linha-desfazer{display:flex;justify-content:space-between;align-items:center;gap:.5rem;background:var(--accent-soft);border-radius:10px;padding:.35rem .35rem .35rem .75rem;font-size:.9375rem}
 html.modo-sol .linha-desfazer{border:1.5px solid #FFF}
-.ligar{display:inline-flex;align-items:center;gap:.35rem;min-height:2.75rem;font-weight:600;text-decoration:none}
+.ligar{display:inline-flex;align-items:center;gap:.35rem;min-height:var(--toque);font-weight:600;text-decoration:none}
 .ligar svg{width:1rem;height:1rem}
 
 /* botões */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:var(--toque);padding:0 1rem;border-radius:12px;border:2px solid var(--accent);background:var(--accent);color:var(--on-accent);font-weight:700;font-size:1rem;cursor:pointer;text-decoration:none;text-align:center;width:100%}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:var(--toque);padding:.4rem 1rem;white-space:normal;overflow-wrap:break-word;border-radius:12px;border:2px solid var(--accent);background:var(--accent);color:var(--on-accent);font-weight:700;font-size:1rem;cursor:pointer;text-decoration:none;text-align:center;width:100%}
 .btn:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
 .btn.sec{background:var(--surface);color:var(--ink);border-color:var(--line)}
 .btn.sec:hover{border-color:var(--ink)}
-.btn.link{background:transparent;border-color:transparent;color:var(--accent);text-decoration:underline;width:auto;min-height:2.75rem;padding:0 .5rem}
+.btn.link{flex-shrink:0;white-space:nowrap;overflow-wrap:normal;background:transparent;border-color:transparent;color:var(--accent);text-decoration:underline;width:auto;min-height:var(--toque);padding:0 .5rem}
 .btn.grande{min-height:3.75rem;font-size:1.125rem}
 .coluna{display:flex;flex-direction:column;gap:.5rem}
 
@@ -201,7 +202,7 @@ body.demo{background:#D5DEDB;min-height:100vh;display:flex;flex-direction:column
 .celular{width:414px;height:868px;padding:12px;border-radius:56px;background:#101716;box-shadow:0 0 0 2px #3A4644 inset,0 30px 60px rgba(18,32,30,.35);transform-origin:top center;position:relative}
 .celular::before{content:"";position:absolute;top:20px;left:50%;transform:translateX(-50%);width:110px;height:30px;border-radius:20px;background:#101716;z-index:50}
 .moldura{position:relative;width:390px;height:844px;border-radius:44px;overflow:hidden;background:var(--ground);transform:translateZ(0)}
-.tela{position:absolute;inset:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}
+.tela{--topo-seguro:44px;position:absolute;inset:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}
 .tela::-webkit-scrollbar{display:none}
 .tela .cab{padding-top:3.25rem}
 .legenda{max-width:280px;font-family:Inter,system-ui,sans-serif;font-size:15px;line-height:1.5;color:#12201E;padding-top:40px;display:flex;flex-direction:column;gap:12px}
@@ -216,6 +217,7 @@ body.demo{background:#D5DEDB;min-height:100vh;display:flex;flex-direction:column
   .celular::before{display:none}
   .moldura{width:100%;height:100%;border-radius:0}
   .tela .cab{padding-top:1rem}
+  .tela{--topo-seguro:0px}
 }
 
 /* ---------- painel do gestor ---------- */
@@ -235,7 +237,7 @@ body.demo{background:#D5DEDB;min-height:100vh;display:flex;flex-direction:column
 .p-topo h1{font-family:"Space Grotesk",Inter,sans-serif;font-size:32px}
 .p-topo .sub{font-size:14px;color:#4A5A57}
 .p-btns{display:flex;gap:10px;flex-wrap:wrap}
-.p-btn{min-height:44px;padding:0 16px;border-radius:10px;border:1.5px solid #B9C6C3;background:#FFF;color:#12201E;font:600 14px Inter,sans-serif;cursor:pointer}
+.p-btn{min-height:44px;padding:0 16px;border-radius:10px;border:1.5px solid #738380;background:#FFF;color:#12201E;font:600 14px Inter,sans-serif;cursor:pointer}
 .p-btn.pri{background:#0E5E5A;border-color:#0E5E5A;color:#FFF}
 .p-btn.lar{background:#9A3F07;border-color:#9A3F07;color:#FFF}
 .p-btn.lar-sec{border-color:#C98A3A;color:#7A3106}
@@ -262,7 +264,7 @@ body.demo{background:#D5DEDB;min-height:100vh;display:flex;flex-direction:column
 .p-pacs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
 .p-pacs li{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:14px}
 .p-feed{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;font-size:14px}
-.p-feed li{display:flex;gap:10px;align-items:baseline;padding:4px 8px;margin:0 -8px;border-radius:8px;transition:background-color .8s}
+.p-feed li{display:flex;gap:10px}
 .p-feed li.novo{background:#FFF7EC}
 .tag-novo{font-size:11px;font-weight:700;color:#7A3106;border:1.5px solid #E39A3B;border-radius:999px;padding:0 6px;margin-left:6px;white-space:nowrap}
 .p-feed li:not(.novo) .tag-novo{display:none}
@@ -281,13 +283,13 @@ body.demo{background:#D5DEDB;min-height:100vh;display:flex;flex-direction:column
 </head>
 <body class="demo">
 <a class="pular" href="#conteudo">Pular para a lista</a>
-<header class="demo-barra" id="demo-barra">
+<div class="demo-barra" id="demo-barra" role="region" aria-label="Controles do protótipo">
   <span class="nome">Transporte Saúde <span>· protótipo</span></span>
   <div class="alternar" role="group" aria-label="Ver o protótipo como">
     <button type="button" id="ver-motorista" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/></svg>App do motorista</button>
     <button type="button" id="ver-gestor" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Painel do gestor</button>
   </div>
-</header>
+</div>
 
 <div class="palco" id="palco">
   <div class="escala" id="escala">
@@ -318,7 +320,6 @@ body.demo{background:#D5DEDB;min-height:100vh;display:flex;flex-direction:column
       <div class="opcoes">
         <label class="opcao"><input type="radio" name="motivo" value="Não atendeu após 4 tentativas de contato">Não atendeu depois de 4 tentativas</label>
         <label class="opcao"><input type="radio" name="motivo" value="Paciente desistiu">Paciente desistiu</label>
-        <label class="opcao"><input type="radio" name="motivo" value="Não estava no local combinado">Não estava no local combinado</label>
         <label class="opcao"><input type="radio" name="motivo" value="Outro">Outro motivo</label>
       </div>
     </fieldset>
@@ -417,7 +418,7 @@ function novoEstado(){
     ],
     volta:[{nome:"Ana Ribeiro", local:"Hospital de Vacaria", hora:"15:00"}],
     alteracao:null, alteracaoFeita:false, offline:false, fila:[], desfazer:null, emViagem:false,
-    servidor:{viagem:"agendada", pac:{maria:"pendente",joao:"pendente",teresinha:"pendente"}, motivos:{}, semAcomp:{}, eventos:[], ultimaSync:"05:20", revisarVolta:false, semSinalDesde:null}
+    servidor:{viagem:"agendada", pac:{maria:"pendente",joao:"pendente",teresinha:"pendente"}, motivos:{}, eventos:[], ultimaSync:"05:20", revisarVolta:false, semSinalDesde:null}
   };
 }
 var E = novoEstado();
@@ -434,15 +435,14 @@ function toast(t){ var e=$("#toast"); e.textContent=t; e.hidden=false; clearTime
 function registrar(ev){
   ev.hora=hora();
   if (E.offline){ E.fila.push(ev); } else { entregar([ev]); E.servidor.ultimaSync=ev.hora; }
-  return ev;
 }
-function primeiroNomeAcomp(p){ return p.acomp ? p.acomp.split(" ")[0] : ""; }
 function entregar(lista){
   var S=E.servidor;
   lista.forEach(function(ev){
     if (ev.viagem) S.viagem=ev.viagem;
-    if (ev.pid){ S.pac[ev.pid]=ev.estado; S.semAcomp[ev.pid]=!!ev.semAcomp; if (ev.motivo) S.motivos[ev.pid]=ev.motivo; else delete S.motivos[ev.pid]; }
+    if (ev.pid){ S.pac[ev.pid]=ev.estado; S.semAcomp=S.semAcomp||{}; S.semAcomp[ev.pid]=!!ev.semAcomp; if (ev.motivo) S.motivos[ev.pid]=ev.motivo; else delete S.motivos[ev.pid]; }
     if (ev.revisar!==undefined) S.revisarVolta=ev.revisar;
+    if (ev.avisoLido && S.aviso) S.aviso.lido=ev.hora;
     S.eventos.unshift({hora:ev.hora, txt:ev.txt, tipo:ev.tipo||"", novo:true});
   });
   renderPainel();
@@ -450,7 +450,7 @@ function entregar(lista){
 
 /* ---------- cabeçalho e faixa ---------- */
 function renderCab(){
-  var st = E.emViagem ? "Em viagem" : (E.viagem.situacao==="andamento" ? "Registrada às "+E.viagem.saida : (E.offline ? "Lista salva 05:20" : "Atualizado 05:20"));
+  var st = E.emViagem ? "Em viagem" : (E.viagem.situacao==="andamento" ? "Viagem iniciada às "+E.viagem.saida : (E.offline ? "Lista salva 05:20" : "Atualizado 05:20"));
   $("#cab").innerHTML =
     '<div class="cab-topo"><span class="cab-data">Terça, 17 de novembro</span><button type="button" class="btn-ajustes" id="abrir-ajustes" aria-haspopup="dialog"><span aria-hidden="true">Aa</span> Ajustes</button></div>'
   + '<div class="coluna" style="gap:.15rem"><span class="rot">Sua viagem de hoje para</span><h1 id="titulo" tabindex="-1">Vacaria</h1></div>'
@@ -474,7 +474,7 @@ function cartao(p){
   if (p.estado==="embarcado") selo='<span class="selo embarcado">Embarcou '+p.horaReg+'</span>';
   else if (p.estado==="nao") selo='<span class="selo nao">Não embarcou</span>';
   else if (E.alteracao && E.alteracao.id===p.id && !E.alteracao.lida) selo='<span class="selo alt">Alterado</span>';
-  else selo='<span class="selo pendente">Aguardando</span>';
+  else selo='<span class="selo pendente">Pendente</span>';
 
   var info = '<div class="pac-info">';
   if (p.horaAntiga) info += '<span class="horario-mudou">'+esc(p.destino)+': <s aria-label="antes '+p.horaAntiga+'">'+p.horaAntiga+'</s> <span aria-hidden="true">→</span> <b>'+p.hora+'</b></span>';
@@ -487,19 +487,17 @@ function cartao(p){
       + '<a class="ligar" href="tel:'+p.tel.replace(/\D/g,"")+'">'+IC.tel+' Ligar para '+primeiroNome(p)+' · '+p.tel+'</a>';
     if (E.viagem.situacao==="andamento"){
       corpo += '<div class="acoes2"><button type="button" class="btn" data-a="embarcou" data-id="'+p.id+'">Embarcou</button><button type="button" class="btn sec" data-a="nao" data-id="'+p.id+'">Não embarcou</button></div>';
+      if (p.acomp) corpo += '<button type="button" class="btn sec" data-a="embarcou-sem" data-id="'+p.id+'">Embarcou sem '+esc(p.acomp.split(" ")[0])+'</button>';
     }
   } else if (p.estado==="nao"){
     corpo = '<p class="pac-sub">Motivo: '+esc(p.motivo)+'</p>';
   }
-  if (p.estado==="pendente" && p.acomp && E.viagem.situacao==="andamento"){
-    corpo += '<button type="button" class="btn sec" data-a="embarcou-so" data-id="'+p.id+'">Embarcou sem '+esc(primeiroNomeAcomp(p))+'</button>';
-  }
-  if (E.desfazer && E.desfazer.id===p.id){
-    corpo += '<div class="linha-desfazer"><span>Registrado às '+p.horaReg+'.</span><button type="button" class="btn link" data-a="desfazer" data-id="'+p.id+'">Desfazer</button></div>';
+  if (p.estado!=="pendente" && !E.emViagem){
+    corpo += '<div class="linha-desfazer"><span>Registrado às '+p.horaReg+'. Foi engano?</span><button type="button" class="btn link" data-a="desfazer" data-id="'+p.id+'" aria-label="Corrigir o registro de '+esc(p.nome)+'">Corrigir</button></div>';
   }
   var cls = "pac" + (E.alteracao && E.alteracao.id===p.id && !E.alteracao.lida ? " alterado" : "");
   return '<li class="'+cls+'" id="pac-'+p.id+'"><div class="pac-topo"><div class="coluna" style="gap:.15rem"><h3 class="pac-nome">'+esc(p.nome)+'</h3>'
-    + (p.acomp?(p.semAcomp?'<span class="pac-sub">Sem acompanhante: '+esc(p.acomp)+' não veio</span>':'<span class="pac-sub">Com acompanhante: '+esc(p.acomp)+'</span>'):'')
+    + (p.acomp?(p.semAcomp?'<span class="pac-sub"><b>Sem acompanhante:</b> '+esc(p.acomp)+' não veio</span>':'<span class="pac-sub">Com acompanhante: '+esc(p.acomp)+'</span>'):'')
     + '</div>'+selo+'</div>'+info+corpo+'</li>';
 }
 
@@ -511,7 +509,7 @@ function telaLista(){
       + '<p>'+esc(a.texto)+'</p><button type="button" class="btn" data-a="entendi">Entendi</button></section>';
   }
   if (E.viagem.situacao==="agendada"){
-    h += '<section class="cartao" aria-labelledby="ini-t"><h2 id="ini-t" style="font-size:1.0625rem">Pronto para sair?</h2><p class="pac-sub">Ao iniciar, a secretaria vê que você saiu e os botões de embarque são liberados.</p><button type="button" class="btn grande" data-a="iniciar">Iniciar viagem</button></section>';
+    h += '<section class="cartao" aria-labelledby="ini-t"><h2 id="ini-t" style="font-size:1.0625rem">Pronto para sair?</h2><p class="pac-sub">Ao iniciar, a secretaria vê que a viagem começou e os botões de embarque são liberados.</p><button type="button" class="btn grande" data-a="iniciar">Iniciar viagem</button></section>';
   }
   h += '<section class="missoes" aria-labelledby="mis-t"><h2 id="mis-t">'+IC.lista+'Missões do dia (2)</h2><ul><li>Buscar resultados de exames no Laboratório Central</li><li>Entregar malote de documentos no Hospital de Vacaria</li></ul></section>';
   h += '<section class="coluna" aria-labelledby="pac-t"><div class="titulo-sec"><h2 id="pac-t">Embarques</h2><span>'+resolvidos()+' de '+E.pacientes.length+' registrados</span></div><ul class="lista">';
@@ -553,29 +551,27 @@ document.addEventListener("click", function(ev){
   var a=t.getAttribute("data-a"), id=t.getAttribute("data-id"), p=id?pac(id):null;
 
   if (a==="iniciar"){
-    passa(4); E.viagem.situacao="andamento"; E.viagem.saida=hora(); registrar({txt:"Saída de Esmeralda registrada", viagem:"andamento"});
+    passa(4); E.viagem.situacao="andamento"; E.viagem.saida=hora(); registrar({txt:"Viagem iniciada pelo motorista", viagem:"andamento"});
     render('[data-a="embarcou"]'); anunciar("Viagem iniciada às "+E.viagem.saida+". Registre o embarque de cada paciente.");
   }
-  if (a==="embarcou" || a==="embarcou-so"){
-    var so = a==="embarcou-so";
-    passa(6); p.estado="embarcado"; p.semAcomp=so; p.horaReg=hora();
-    var txt = p.nome+" embarcou"+(so?" sem o acompanhante ("+p.acomp+" não veio)":(p.acomp?" com o acompanhante":""));
-    var evE = registrar({txt:txt, pid:p.id, estado:"embarcado", semAcomp:so, tipo:so?"alt":""});
-    marcarDesfazer(p, evE);
+  if (a==="embarcou" || a==="embarcou-sem"){
+    var sem = a==="embarcou-sem"; p.semAcomp=sem;
+    passa(6); p.estado="embarcado"; p.horaReg=hora(); registrar({txt:p.nome+(sem?" embarcou sem o acompanhante ("+p.acomp.split(" (")[0]+")":" embarcou"), pid:p.id, estado:"embarcado", semAcomp:sem});
+    marcarDesfazer(p);
     render("#pac-"+p.id+' [data-a="desfazer"]');
-    anunciar((so ? p.nome+" embarcou às "+p.horaReg+", sem "+primeiroNomeAcomp(p)+"." : p.nome+" embarcou às "+p.horaReg+".")+" Se foi engano, use Desfazer.");
+    anunciar(p.nome+" embarcou às "+p.horaReg+". Se foi engano, use Corrigir.");
     if (!E.alteracaoFeita) agendarAlteracao();
   }
   if (a==="nao"){ abrirNao(p); }
   if (a==="desfazer"){
-    clearTimeout(undoTimer); var evOrig=E.desfazer && E.desfazer.ev; E.desfazer=null; var era=p.estado; p.estado="pendente"; p.motivo=null; p.semAcomp=false;
-    var iFila = evOrig ? E.fila.indexOf(evOrig) : -1;
-    if (iFila>=0) E.fila.splice(iFila,1); /* ainda não saiu do celular: só retira da fila */
-    else registrar({txt:"Registro corrigido pelo motorista: "+p.nome+" voltou para Aguardando", pid:p.id, estado:"pendente", revisar:(era==="nao"&&p.voltaOutra)?false:undefined, tipo:"alt"}); /* já entregue: correção (vai pela fila se estiver sem sinal) */
-    render("#pac-"+p.id+' [data-a="embarcou"]'); anunciar("Registro desfeito. "+p.nome+" voltou para Aguardando.");
+    clearTimeout(undoTimer); E.desfazer=null; var era=p.estado; p.estado="pendente"; p.motivo=null; p.semAcomp=false;
+    var naFila=-1; E.fila.forEach(function(ev,i){ if (ev.pid===p.id) naFila=i; });
+    if (E.offline && naFila>=0) E.fila.splice(naFila,1);
+    else registrar({txt:"Registro corrigido pelo motorista: "+p.nome+" voltou para Pendente", pid:p.id, estado:"pendente", revisar:(era==="nao"&&p.voltaOutra)?false:undefined, tipo:"alt"});
+    render("#pac-"+p.id+' [data-a="embarcou"]'); anunciar("Registro corrigido. "+p.nome+" voltou para Pendente.");
   }
   if (a==="entendi"){
-    E.alteracao.lida=true; render("#pac-"+E.alteracao.id); 
+    E.alteracao.lida=true; passa(2); registrar({txt:"Motorista leu o aviso sobre o horário de João Fulano", avisoLido:true}); render("#pac-"+E.alteracao.id); 
     var c=$("#pac-"+E.alteracao.id); if (c){ c.setAttribute("tabindex","-1"); c.focus(); }
     anunciar("Aviso marcado como lido. O novo horário aparece no cartão de "+pac(E.alteracao.id).nome+".");
   }
@@ -583,10 +579,7 @@ document.addEventListener("click", function(ev){
   if (a==="voltar-lista"){ E.emViagem=false; render("#titulo"); }
 });
 
-/* WCAG 2.2.1: o Desfazer não tem prazo. Fica no último registro até o próximo registro ou até seguir viagem. */
-function marcarDesfazer(p, ev){
-  clearTimeout(undoTimer); E.desfazer={id:p.id, ev:ev};
-}
+function marcarDesfazer(p){ E.desfazer={id:p.id}; } /* v2: sem limite de tempo (WCAG 2.2.1); a correção fica disponível até seguir viagem */
 
 function agendarAlteracao(){
   E.alteracaoFeita=true;
@@ -599,7 +592,8 @@ function aplicarAlteracao(){
   E.alteracaoPendente=false;
   var j=pac("joao");
   j.horaAntiga=j.hora; j.hora="10:30";
-  E.servidor.eventos.unshift({hora:hora(), txt:"Rita alterou o horário de João Fulano: 08:00 → 10:30. Motorista avisado.", tipo:"", novo:true}); renderPainel();
+  E.servidor.aviso={hora:hora(), lido:null};
+  E.servidor.eventos.unshift({hora:hora(), txt:"Rita alterou o horário de João Fulano: 08:00 → 10:30", tipo:"", novo:true}); renderPainel();
   E.alteracao={id:"joao", hora:hora(), lida:false, texto:"João Fulano agora deve estar na Clínica de Imagem às 10:30 (antes 08:00). O local de embarque continua o mesmo."};
   var foco=document.activeElement, sel=foco && foco.getAttribute("data-a") ? '[data-a="'+foco.getAttribute("data-a")+'"]'+(foco.getAttribute("data-id")?'[data-id="'+foco.getAttribute("data-id")+'"]':'') : null;
   render(sel);
@@ -628,6 +622,7 @@ function fecharAtual(){
 document.addEventListener("keydown", function(ev){ if (ev.key==="Escape" && aberto) fecharAtual(); });
 $("#veu").addEventListener("click", fecharAtual);
 /* arrastar a alça para baixo fecha a janela, como nas folhas inferiores do Android */
+var escalaAtual=1;
 Array.prototype.forEach.call(document.querySelectorAll("dialog .alca"), function(alca){
   var d=alca.closest("dialog"), y0=null, dy=0;
   alca.addEventListener("pointerdown", function(ev){ y0=ev.clientY; dy=0; try{ alca.setPointerCapture(ev.pointerId); }catch(e){} });
@@ -681,7 +676,7 @@ $("#form-nao").addEventListener("submit", function(ev){
   passa(5); p.estado="nao"; p.motivo=motivo; p.horaReg=hora(); registrar({txt:p.nome+" não embarcou. Motivo: "+motivo, pid:p.id, estado:"nao", motivo:motivo, revisar:p.voltaOutra?true:undefined, tipo:"alt"});
   marcarDesfazer(p);
   render("#pac-"+p.id+' [data-a="desfazer"]');
-  anunciar("Não embarque de "+p.nome+" registrado. Se foi engano, use Desfazer.");
+  anunciar("Não embarque de "+p.nome+" registrado. Se foi engano, use Corrigir.");
 });
 
 /* ---------- seguir viagem ---------- */
@@ -694,14 +689,14 @@ function abrirSeguir(){
   nao.forEach(function(p){ h+='<li><span>'+esc(p.nome)+'</span><span>Não embarcou</span></li>'; });
   h+='</ul>';
   if (pessoas===0) h+='<p class="nota" style="margin-top:.75rem"><b>Nenhum paciente embarcou.</b> A viagem ainda tem as missões do dia. Se tiver dúvida, ligue para a secretaria antes de seguir.</p>';
-  else h+='<p style="margin-top:.75rem"><b>'+pessoas+' '+(pessoas===1?'pessoa':'pessoas')+' no carro, além de você.</b> Confira se está todo mundo antes de seguir.</p>';
+  else h+='<p style="margin-top:.75rem"><b>'+pessoas+' '+(pessoas===1?'pessoa':'pessoas')+' no carro.</b> Confira se está todo mundo antes de seguir.</p>';
   if (E.alteracao && !E.alteracao.lida) h+='<p class="nota" style="margin-top:.75rem">Você ainda não leu o aviso da secretaria sobre o horário de João.</p>';
   $("#seguir-corpo").innerHTML=h;
   abrir(dlgS); $("#seguir-ok").focus();
 }
 $("#seguir-voltar").addEventListener("click", function(){ fechar(dlgS); $('[data-a="seguir"]').focus(); });
 $("#seguir-ok").addEventListener("click", function(){
-  fechar(dlgS); clearTimeout(undoTimer); E.desfazer=null; E.emViagem=true; registrar({txt:"Motorista seguiu para Vacaria", viagem:"viagem"});
+  fechar(dlgS); clearTimeout(undoTimer); E.desfazer=null; E.emViagem=true; registrar({txt:"Saída de Esmeralda registrada: motorista seguiu para Vacaria", viagem:"viagem"});
   render("#t-ok"); $("#tela").scrollTop=0;
 });
 
@@ -752,14 +747,15 @@ $("#aj-reiniciar").addEventListener("click", function(){
 
 /* ---------- painel do gestor ---------- */
 function chipPac(st){
-  return {pendente:'<span class="chip pen">Aguardando</span>', embarcado:'<span class="chip emb">Embarcou</span>', nao:'<span class="chip nao">Não embarcou</span>'}[st];
+  return {pendente:'<span class="chip pen">Pendente</span>', embarcado:'<span class="chip emb">Embarcou</span>', nao:'<span class="chip nao">Não embarcou</span>'}[st];
 }
+var novoTimer=null;
 function renderPainel(){
   var el=$("#painel"); if (el.hidden) return;
   var S=E.servidor, nomes={maria:"Maria Aparecida Lopes",joao:"João Fulano",teresinha:"Teresinha Borges"};
   var cont={pendente:0,embarcado:0,nao:0}; Object.keys(S.pac).forEach(function(k){ cont[S.pac[k]]++; });
   var sit = S.viagem==="agendada" ? '<span class="chip ag">Agendada</span>' : '<span class="chip and">'+(S.viagem==="viagem"?'A caminho':'Em andamento')+'</span>';
-  var partes=[]; if (cont.embarcado) partes.push(cont.embarcado+(cont.embarcado===1?' embarcou':' embarcaram')); if (cont.nao) partes.push(cont.nao+(cont.nao===1?' não embarcou':' não embarcaram')); if (cont.pendente) partes.push(cont.pendente+' aguardando');
+  var partes=[]; if (cont.embarcado) partes.push(cont.embarcado+(cont.embarcado===1?' embarcou':' embarcaram')); if (cont.nao) partes.push(cont.nao+(cont.nao===1?' não embarcou':' não embarcaram')); if (cont.pendente) partes.push(cont.pendente+(cont.pendente===1?' pendente':' pendentes'));
   var resumo = S.viagem==="agendada" ? '3 pacientes, 1 acompanhante' : partes.join(' · ');
   var h='<nav class="p-nav" aria-label="Menu do painel"><div class="m"><b>Transporte Saúde</b><span>Secretaria de Saúde · Esmeralda</span></div><ul>'
    + '<li><a href="#gestor" aria-current="page">Viagens</a></li><li><a href="#gestor" data-p="fora">Pacientes</a></li><li><a href="#gestor" data-p="fora">Motoristas</a></li><li><a href="#gestor" data-p="fora">Veículos</a></li><li><a href="#gestor" data-p="fora">Histórico</a></li></ul><span class="quem">Rita · gestora</span></nav>';
@@ -769,26 +765,27 @@ function renderPainel(){
     h+='<section class="p-alerta" role="alert"><div><b>Revisar volta</b><span>Teresinha Borges não embarcou na ida (motivo: '+esc(S.motivos.teresinha||"")+'). A volta dela está em outra viagem.</span></div><div class="p-btns"><button type="button" class="p-btn lar" data-p="fora">Cancelar a volta</button></div></section>';
   }
   h+='<section class="p-alerta"><div><b>Volta sem viagem definida</b><span>Luiz Carvalho vai só de ida a Passo Fundo (viagem das 04:45) e ainda não tem volta.</span></div><div class="p-btns"><button type="button" class="p-btn lar-sec" data-p="fora">Sem retorno previsto</button><button type="button" class="p-btn lar" data-p="fora">Incluir em outra viagem</button></div></section>';
-  h+='<div class="p-grade"><section class="p-tab" aria-label="Viagens de hoje"><table><thead><tr><th scope="col">Destino</th><th scope="col">Saída</th><th scope="col">Motorista e veículo</th><th scope="col">Pacientes</th><th scope="col">Situação</th></tr></thead><tbody>'
+  h+='<div class="p-grade"><section class="p-tab" aria-label="Viagens de hoje" tabindex="0"><table><thead><tr><th scope="col">Destino</th><th scope="col">Saída</th><th scope="col">Motorista e veículo</th><th scope="col">Pacientes</th><th scope="col">Situação</th></tr></thead><tbody>'
    + '<tr class="sel"><td>Vacaria</td><td>05:30</td><td>Carlos Menezes<br>Spin IXY2B34</td><td>'+resumo+'</td><td>'+sit+'</td></tr>'
    + '<tr><td>Passo Fundo</td><td>04:45</td><td>Lucas Prado<br>Van JZK4C21</td><td>6 embarcaram de 7</td><td><span class="chip and">Em andamento</span></td></tr>'
-   + '<tr><td>Vacaria</td><td>13:00</td><td>Sérgio Dal Molin<br>Gol IWE7A09</td><td>3 aguardando</td><td><span class="chip ag">Agendada</span></td></tr>'
+   + '<tr><td>Vacaria</td><td>13:00</td><td>Sérgio Dal Molin<br>Gol IWE7A09</td><td>3 pendentes</td><td><span class="chip ag">Agendada</span></td></tr>'
    + '<tr><td>Lagoa Vermelha</td><td>07:00</td><td>—</td><td>—</td><td><span class="chip can">Cancelada</span></td></tr></tbody></table></section>';
   h+='<div class="p-det"><section class="p-card" aria-labelledby="det-t"><div><h2 id="det-t">Vacaria · saída 05:30</h2><p class="sub">Carlos Menezes · Spin IXY2B34</p></div>';
   h+= S.semSinalDesde ? '<p class="p-conexao off" role="status">Motorista sem sinal desde '+S.semSinalDesde+'. Pode haver registros ainda não recebidos; espere antes de cancelar ou transferir algo desta viagem.</p>'
                       : '<p class="p-conexao" role="status">Motorista conectado. Última sincronização às '+S.ultimaSync+'.</p>';
-  h+='<ul class="p-pacs">'; Object.keys(S.pac).forEach(function(k){ h+='<li><span>'+nomes[k]+(k==="maria"?(S.semAcomp.maria?' · acompanhante não veio':' + acompanhante'):'')+'</span>'+chipPac(S.pac[k])+'</li>'; }); h+='<li><span>Ana Ribeiro (só volta, 15:00)</span><span class="chip pen">Na volta</span></li></ul></section>';
+  if (S.aviso) h+= S.aviso.lido ? '<p class="p-conexao" role="status">Aviso das '+S.aviso.hora+' (horário de João): lido pelo motorista às '+S.aviso.lido+'.</p>'
+                                : '<p class="p-conexao off" role="status">Aviso das '+S.aviso.hora+' (horário de João): ainda não lido pelo motorista.</p>';
+  h+='<ul class="p-pacs">'; Object.keys(S.pac).forEach(function(k){ h+='<li><span>'+nomes[k]+(k==="maria"?((S.semAcomp&&S.semAcomp.maria&&S.pac.maria==="embarcado")?' (sem acompanhante)':' + acompanhante'):'')+'</span>'+chipPac(S.pac[k])+'</li>'; }); h+='<li><span>Ana Ribeiro (só volta, 15:00)</span><span class="chip pen">Na volta</span></li></ul></section>';
   h+='<section class="p-card" aria-labelledby="feed-t"><div><h2 id="feed-t">Ao vivo</h2><p class="sub">Checks do motorista e alterações, do mais recente ao mais antigo</p></div>';
   if (!S.eventos.length) h+='<p class="p-vazio">Nada registrado ainda. Inicie a viagem no app do motorista e os registros aparecem aqui.</p>';
   else { h+='<ol class="p-feed">'; S.eventos.forEach(function(e){ h+='<li class="'+(e.novo?'novo':'')+'"><time>'+e.hora+'</time><span class="'+e.tipo+'">'+esc(e.txt)+'<span class="tag-novo">novo</span></span></li>'; }); h+='</ol>'; }
   h+='</section></div></div></main>';
   el.innerHTML=h;
   S.eventos.forEach(function(e){ e.novo=false; });
-  /* o destaque de "novo" some sozinho depois de alguns segundos, sem redesenhar (não tira o foco da gestora) */
+  /* o destaque de "novo" some sozinho depois de alguns segundos, sem redesenhar */
   clearTimeout(novoTimer);
   novoTimer=setTimeout(function(){ Array.prototype.forEach.call(el.querySelectorAll(".p-feed li.novo"), function(li){ li.classList.remove("novo"); }); }, 8000);
 }
-var novoTimer=null;
 var ptt=null;
 document.addEventListener("click", function(ev){
   var t=ev.target.closest('[data-p="fora"]'); if (!t) return;
@@ -812,11 +809,10 @@ $("#ver-motorista").addEventListener("click", function(){ if (location.hash==="#
 $("#ver-gestor").addEventListener("click", function(){ if (location.hash!=="#gestor") history.pushState(null,"","#gestor"); mudarModo("gestor", true); });
 window.addEventListener("popstate", function(){ mudarModo(location.hash==="#gestor"?"gestor":"motorista", false); });
 
-var escalaAtual=1;
 function ajustarEscala(){
   var cel=$("#celular"), esc2=$("#escala");
   document.body.style.setProperty("--barra-demo", $("#demo-barra").offsetHeight+"px");
-  if (window.innerWidth<=500){ cel.style.transform=""; esc2.style.height=""; escalaAtual=1; return; }
+  if (window.innerWidth<=500){ escalaAtual=1; cel.style.transform=""; esc2.style.height=""; return; }
   var disp=window.innerHeight-$("#demo-barra").offsetHeight-56;
   var k=Math.min(1, Math.max(.55, disp/868)); escalaAtual=k;
   cel.style.transform="scale("+k+")"; esc2.style.height=(868*k)+"px"; esc2.style.width=(414*k)+"px";
