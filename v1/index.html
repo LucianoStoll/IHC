@@ -345,28 +345,6 @@ body.demo{background:#D5DEDB;min-height:100vh;display:flex;flex-direction:column
   </div>
 </dialog>
 
-<!-- ajustes -->
-        <dialog id="dlg-ajustes" aria-labelledby="aj-titulo">
-  <div class="dlg">
-    <span class="alca" aria-hidden="true"></span>
-    <h2 id="aj-titulo">Ajustes</h2>
-    <fieldset>
-      <legend>Tamanho do texto</legend>
-      <div class="opcoes">
-        <label class="opcao"><input type="radio" name="tam" value="">Padrão</label>
-        <label class="opcao" style="font-size:1.15em"><input type="radio" name="tam" value="texto-grande">Grande</label>
-        <label class="opcao" style="font-size:1.3em"><input type="radio" name="tam" value="texto-muito-grande">Muito grande</label>
-      </div>
-    </fieldset>
-    <label class="opcao"><input type="checkbox" id="aj-sol"><span><b>Modo sol</b><br><span class="pac-sub">Alto contraste para ler sob luz forte.</span></span></label>
-    <button type="button" class="btn" id="aj-ok">Pronto</button>
-    <div class="coluna" style="border-top:1.5px dashed var(--line);padding-top:1rem">
-      <p class="pac-sub"><b>Controles do teste</b> (não fazem parte do app)</p>
-      <label class="opcao"><input type="checkbox" id="aj-offline">Simular celular sem sinal</label>
-      <button type="button" class="btn sec" id="aj-reiniciar">Reiniciar protótipo</button>
-    </div>
-  </div>
-</dialog>
 
       </div>
     </div>
@@ -379,7 +357,7 @@ body.demo{background:#D5DEDB;min-height:100vh;display:flex;flex-direction:column
       <li>Registre quem embarcou e quem não embarcou.</li>
       <li>Toque em <b>Seguir para Vacaria</b>.</li>
     </ol>
-    <p>Em <b>Ajustes</b> ficam o texto grande, o modo sol e os controles do teste (sem sinal e reiniciar). O que o motorista registra aparece no <b>Painel do gestor</b>.</p>
+    <p>O que o motorista registra aparece no <b>Painel do gestor</b>. Para recomeçar, recarregue a página.</p>
   </aside>
 </div>
 
@@ -448,11 +426,10 @@ function entregar(lista){
 function renderCab(){
   var st = E.emViagem ? "Em viagem" : (E.viagem.situacao==="andamento" ? "Viagem iniciada às "+E.viagem.saida : (E.offline ? "Lista salva 05:20" : "Atualizado 05:20"));
   $("#cab").innerHTML =
-    '<div class="cab-topo"><span class="cab-data">Terça, 17 de novembro</span><button type="button" class="btn-ajustes" id="abrir-ajustes" aria-haspopup="dialog"><span aria-hidden="true">Aa</span> Ajustes</button></div>'
+    '<div class="cab-topo"><span class="cab-data">Terça, 17 de novembro</span></div>'
   + '<div class="coluna" style="gap:.15rem"><span class="rot">Sua viagem de hoje para</span><h1 id="titulo" tabindex="-1">Vacaria</h1></div>'
   + '<div class="cab-grade"><div class="cab-bloco"><span class="r">Saída de Esmeralda</span><span class="v">05:30</span><span class="s">'+esc(st)+'</span></div>'
   + '<div class="cab-bloco"><span class="r">Veículo</span><span class="v">Spin · IXY2B34</span><span class="s">7 lugares</span></div></div>';
-  $("#abrir-ajustes").addEventListener("click", abrirAjustes);
   var f=$("#faixa-sinal");
   if (E.offline){
     var n=E.fila.length;
@@ -704,50 +681,8 @@ $("#seguir-ok").addEventListener("click", function(){
   render("#t-ok"); $("#tela").scrollTop=0;
 });
 
-/* ---------- ajustes ---------- */
-var dlgA=$("#dlg-ajustes"), raiz=document.documentElement, modo="motorista";
-function lerAj(){ try{ return JSON.parse(localStorage.getItem("transporte-ajustes")||"{}"); }catch(e){ return {}; } }
-var aj=lerAj();
-function aplicarAj(){
-  raiz.classList.remove("texto-grande","texto-muito-grande","modo-sol");
-  if (modo==="gestor") return;
-  if (aj.tam) raiz.classList.add(aj.tam);
-  if (aj.sol) raiz.classList.add("modo-sol");
-  try{ localStorage.setItem("transporte-ajustes", JSON.stringify(aj)); }catch(e){}
-}
-aplicarAj();
-function abrirAjustes(){
-  dlgA.querySelectorAll('input[name="tam"]').forEach(function(r){ r.checked = r.value===(aj.tam||""); });
-  $("#aj-sol").checked=!!aj.sol; $("#aj-offline").checked=E.offline;
-  abrir(dlgA); (dlgA.querySelector('input[name="tam"]:checked')).focus();
-}
-dlgA.addEventListener("change", function(ev){
-  if (ev.target.name==="tam"){ aj.tam=ev.target.value; aplicarAj(); }
-  if (ev.target.id==="aj-sol"){ aj.sol=ev.target.checked; aplicarAj(); }
-  if (ev.target.id==="aj-offline"){ mudarSinal(ev.target.checked); }
-});
-function mudarSinal(off){
-  var f=$("#faixa-sinal");
-  if (off){ E.offline=true; E.fila=[]; E.servidor.semSinalDesde=hora(); delete f.dataset.enviados; renderPainel(); }
-  else {
-    var n=E.fila.length; E.offline=false;
-    var lote=E.fila.slice().sort(function(a,b){ return a.hora<b.hora?-1:1; }); /* RN15: na ordem da hora do aparelho */
-    E.servidor.semSinalDesde=null; E.servidor.ultimaSync=hora();
-    if (lote.length) entregar(lote); else renderPainel();
-    if (n) f.dataset.enviados = n+(n===1?" registro":" registros"); else delete f.dataset.enviados;
-    E.fila=[];
-    if (E.alteracaoPendente) setTimeout(aplicarAlteracao, 1200);
-    setTimeout(function(){ delete f.dataset.enviados; renderCab(); }, 6000);
-  }
-  render();
-  anunciar(off ? "Sem sinal. Seus registros ficam guardados no celular." : "Sinal de volta. Registros enviados para a secretaria.");
-}
-function fecharAjustes(){ fechar(dlgA); $("#abrir-ajustes").focus(); }
-$("#aj-ok").addEventListener("click", fecharAjustes);
-$("#aj-reiniciar").addEventListener("click", function(){
-  clearTimeout(undoTimer); E=novoEstado(); delete $("#faixa-sinal").dataset.enviados; renderPainel();
-  fechar(dlgA); render("#titulo"); $("#tela").scrollTop=0; toast("Protótipo reiniciado.");
-});
+/* versão 1: sem a janela Ajustes (sem tamanho do texto, modo sol e controles do teste) */
+var modo="motorista";
 
 /* ---------- painel do gestor ---------- */
 function chipPac(st){
@@ -805,7 +740,6 @@ function mudarModo(m, foco){
   $("#ver-motorista").setAttribute("aria-pressed", String(!g));
   $("#ver-gestor").setAttribute("aria-pressed", String(g));
   document.title = g ? "Painel do gestor · Transporte Saúde" : "Lista do dia · Transporte Saúde";
-  aplicarAj();
   if (g){ renderPainel(); if (foco) $("#p-titulo").focus(); }
   else { ajustarEscala(); if (foco) $("#titulo").focus(); }
 }

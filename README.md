@@ -20,7 +20,7 @@ No computador, o app aparece dentro de um celular, para facilitar a apresentaç�
   - funciona com leitor de tela e teclado;
   - motivos prontos, para não precisar digitar;
   - botão de ligar para o paciente;
-  - funcionamento sem sinal (na versão 2, a simulação saiu da tela; ela continua na versão 1, em Ajustes).
+  - funcionamento sem sinal (a lógica está no protótipo, mas não há controle na tela para simular).
 
 ## Antes de cada participante
 
@@ -34,7 +34,7 @@ Ela passa pelo aviso de alteração, pelo erro de motivo (se a pessoa tentar reg
 
 ## Versões
 
-- **Versão 1 (`/v1/`, link `.../IHC/v1/`):** a versão que passou pela avaliação da etapa 5. É o "antes" da etapa 6.
+- **Versão 1 (`/v1/`, link `.../IHC/v1/`):** a versão que passou pela avaliação da etapa 5. É o "antes" da etapa 6. Não tem a janela Ajustes (tamanho do texto e modo sol).
 - **Versão 2 (raiz do site):** corrige 7 dos 13 problemas da avaliação. O quadro está em `MUDANCAS.md` e as imagens de antes e depois em `evidencias/`.
 
 ## Como publicar

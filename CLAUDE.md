@@ -21,7 +21,7 @@ O repositório já teve um trabalho de IHC sobre a Cantina (recuperação). **El
 | `README.md` | Como usar o protótipo, a tarefa sugerida para o teste de usabilidade e como publicar. |
 | `CLAUDE.md` | Este arquivo. |
 | `MUDANCAS.md` | Quadro das correções C1 a C7 (versão 1 → versão 2), com os problemas PR da etapa 5 e as medições. |
-| `v1/index.html` | Cópia congelada da versão 1, a que passou pela avaliação da etapa 5 (o "antes"). **Não editar.** |
+| `v1/index.html` | Cópia congelada da versão 1, a que passou pela avaliação da etapa 5 (o "antes"). Não tem a janela Ajustes (nem tamanho do texto, nem modo sol, nem controles do teste). **Não editar.** |
 | `evidencias/` | Imagens de antes e depois das correções C1 a C4 (etapa 6). |
 | `.nojekyll` | Faz o GitHub Pages servir os arquivos como estão. |
 
@@ -144,7 +144,8 @@ As entregas no destino, as retiradas para a volta e a chegada ficam **fora do pr
   - A alteração do João dispara **2,5 s depois do primeiro embarque** (`agendarAlteracao()`). Se o celular estiver sem sinal, fica pendente até o sinal voltar.
   - **Corrigir** não tem prazo (WCAG 2.2.1; na versão 1 eram 10 s).
 - **Ajustes de leitura:** texto grande (118%), muito grande (135%) e **modo sol** (alto contraste). São classes no `<html>`, aplicadas **só no modo motorista** e salvas em `localStorage` (chave `transporte-ajustes`, sempre dentro de try/catch).
-- **Controles do teste:** removidos da versão 2 a pedido da dupla (Ajustes só tem texto e modo sol). Para reiniciar, recarregue a página. A lógica sem sinal (`E.offline`, `E.fila`) continua no código, mas não há mais como ativá-la pela tela. A versão 1 ainda tem os controles.
+- **Controles do teste:** removidos das duas versões a pedido da dupla. Para reiniciar, recarregue a página. A lógica sem sinal (`E.offline`, `E.fila`) continua no código, mas não há como ativá-la pela tela.
+- **Ajustes (tamanho do texto e modo sol) só existem na versão 2.** A versão 1 não tem o botão nem a janela, e ignora o que a versão 2 salvou no `localStorage`.
 
 ### Design
 - Foco em dois tons: contorno `#12201E` com margem branca (no modo sol, amarelo com margem preta). Bordas `--line` `#738380` (≥3:1).

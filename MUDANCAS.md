@@ -16,6 +16,10 @@ Verificação automática (axe-core 4.10, 10 situações): a versão 1 teve 3 re
 
 Ficam para a próxima versão: PR7 a PR10, PR12 e PR13 (ver etapa 5.4 do relatório).
 
+## Só na versão 2, fora do quadro
+
+- A janela **Ajustes**, com tamanho do texto (grande e muito grande) e **modo sol** (alto contraste). A versão 1 não tem esses recursos.
+
 ## O que vale para as duas versões (não entra no antes e depois)
 
 - Botão **Embarcou sem Pedro**, para o acompanhante que não veio; a contagem de pessoas no carro e o painel levam isso em conta.
