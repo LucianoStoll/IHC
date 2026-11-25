@@ -202,12 +202,7 @@ body.demo{background:#D5DEDB;min-height:100vh;display:flex;flex-direction:column
 .tela{position:absolute;inset:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}
 .tela::-webkit-scrollbar{display:none}
 .tela .cab{padding-top:3.25rem}
-.legenda{max-width:280px;font-family:Inter,system-ui,sans-serif;font-size:15px;line-height:1.5;color:#12201E;padding-top:40px;display:flex;flex-direction:column;gap:12px}
-.legenda h2{font-family:"Space Grotesk",Inter,sans-serif;font-size:24px}
-.legenda p{color:#3B4A47}
-.legenda ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;color:#3B4A47}
-@media (max-width:860px){ .legenda{display:none} }
-@media (max-width:500px){
+@media (max-width:860px){ @media (max-width:500px){
   .palco{padding:0}
   .escala{width:100%;height:auto !important}
   .celular{width:100%;height:calc(100dvh - var(--barra-demo,56px));padding:0;border-radius:0;box-shadow:none;transform:none !important;background:transparent}
@@ -349,16 +344,6 @@ body.demo{background:#D5DEDB;min-height:100vh;display:flex;flex-direction:column
       </div>
     </div>
   </div>
-  <aside class="legenda" aria-label="Como usar o protótipo">
-    <h2>App do motorista</h2>
-    <p>Use como no celular: toque nos botões e role a tela.</p>
-    <ol>
-      <li>Toque em <b>Iniciar viagem</b>.</li>
-      <li>Registre quem embarcou e quem não embarcou.</li>
-      <li>Toque em <b>Seguir para Vacaria</b>.</li>
-    </ol>
-    <p>O que o motorista registra aparece no <b>Painel do gestor</b>. Para recomeçar, recarregue a página.</p>
-  </aside>
 </div>
 
 <div class="painel" id="painel" hidden></div>
