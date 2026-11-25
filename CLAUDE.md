@@ -113,6 +113,7 @@ As entregas no destino, as retiradas para a volta e a chegada ficam **fora do pr
 - **App do motorista:** no desktop, aparece dentro de uma moldura de celular de 390×844 que se ajusta à altura da janela (`ajustarEscala()`). Em telas de até 500 px, ocupa a tela inteira, sem moldura.
 - **Painel do gestor:** abre em tela cheia (`#gestor`) e mostra ao vivo o que o motorista registra.
 - Os modos são alternados por `mudarModo()`, com `history.pushState` e `popstate`.
+- **Botão de versão** (`.versoes`, na mesma barra): links entre `index.html` e `v1/index.html` (na v1, `../index.html`). Ao clicar, o link leva junto o `#gestor`, para abrir a mesma tela na outra versão. Existe nas duas versões.
 
 ### Dados fictícios (manter consistentes com o canvas, os slides e o relatório)
 - Terça, 17 de novembro. Viagem Esmeralda → **Vacaria**, saída **05:30**, veículo **Spin · IXY2B34** (7 lugares), motorista Carlos Menezes.

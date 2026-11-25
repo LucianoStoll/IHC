@@ -191,6 +191,13 @@ body.demo{background:#D5DEDB;min-height:100vh;display:flex;flex-direction:column
 .demo-barra{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:.6rem 1.25rem;background:#12201E;color:#FFF;font-family:Inter,system-ui,sans-serif;font-size:16px}
 .demo-barra .nome{font-weight:700;font-size:15px}
 .demo-barra .nome span{font-weight:400;color:#C9D6D3}
+.versoes{display:inline-flex;background:#2A3A37;border-radius:12px;padding:4px;gap:4px}
+.versoes a{min-height:40px;padding:0 14px;border-radius:9px;color:#E4EAE8;font:600 14px Inter,system-ui,sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.versoes a:hover{color:#FFF;background:#3A4A47}
+.versoes a[aria-current="page"]{background:#FFF;color:#12201E}
+.versoes a:focus-visible{outline:3px solid #F2B35B;outline-offset:2px;box-shadow:none}
+.versoes .d{font-weight:400}
+.demo-dir{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .alternar{display:inline-flex;background:#2A3A37;border-radius:12px;padding:4px;gap:4px}
 .alternar button{min-height:40px;padding:0 14px;border:0;border-radius:9px;background:transparent;color:#E4EAE8;font:600 14px Inter,system-ui,sans-serif;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
 .alternar button svg{width:18px;height:18px}
@@ -280,9 +287,12 @@ body.demo{background:#D5DEDB;min-height:100vh;display:flex;flex-direction:column
 <a class="pular" href="#conteudo">Pular para a lista</a>
 <div class="demo-barra" id="demo-barra" role="region" aria-label="Controles do protótipo">
   <span class="nome">Transporte Saúde <span>· protótipo</span></span>
+  <div class="demo-dir">
+  <nav class="versoes" aria-label="Versão do protótipo"><a href="v1/index.html">Versão 1 <span class="d">· antes</span></a><a aria-current="page">Versão 2 <span class="d">· depois</span></a></nav>
   <div class="alternar" role="group" aria-label="Ver o protótipo como">
     <button type="button" id="ver-motorista" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/></svg>App do motorista</button>
     <button type="button" id="ver-gestor" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Painel do gestor</button>
+  </div>
   </div>
 </div>
 
@@ -778,6 +788,10 @@ function ajustarEscala(){
   cel.style.marginLeft=((414*k-414)/2)+"px";
 }
 window.addEventListener("resize", ajustarEscala);
+/* botão de versão: leva para a mesma tela (motorista ou painel) na outra versão */
+Array.prototype.forEach.call(document.querySelectorAll(".versoes a[href]"), function(a){
+  a.addEventListener("click", function(){ a.href = a.getAttribute("href").split("#")[0] + location.hash; });
+});
 
 render();
 mudarModo(location.hash==="#gestor"?"gestor":"motorista", false);

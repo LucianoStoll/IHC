@@ -2,7 +2,7 @@
 
 Protótipo navegável do fluxo principal do motorista: conferir a viagem do dia, registrar o embarque de cada paciente e seguir para o destino.
 
-No computador, o app aparece dentro de um celular, para facilitar a apresentação. No topo, o botão **Painel do gestor** abre o painel da secretaria em tela cheia, que mostra ao vivo o que o motorista registra. No celular de verdade, o app ocupa a tela inteira e o mesmo botão continua no topo. O link direto para o painel termina em `#gestor`.
+No computador, o app aparece dentro de um celular, para facilitar a apresentação. No topo, o botão **Painel do gestor** abre o painel da secretaria em tela cheia, que mostra ao vivo o que o motorista registra. No celular de verdade, o app ocupa a tela inteira e o mesmo botão continua no topo. O link direto para o painel termina em `#gestor`. Ao lado, o botão **Versão 1 · antes / Versão 2 · depois** troca de versão e mantém a tela aberta (app ou painel).
 
 ## O que o protótipo cobre
 
