@@ -20,12 +20,11 @@ No computador, o app aparece dentro de um celular, para facilitar a apresentaç�
   - funciona com leitor de tela e teclado;
   - motivos prontos, para não precisar digitar;
   - botão de ligar para o paciente;
-  - funcionamento sem sinal.
+  - funcionamento sem sinal (na versão 2, a simulação saiu da tela; ela continua na versão 1, em Ajustes).
 
-## Controles do teste (em Ajustes)
+## Antes de cada participante
 
-- **Simular celular sem sinal:** os registros ficam guardados e aparece o aviso "Sem sinal". O painel do gestor mostra que o motorista está sem sinal e só recebe os registros quando a simulação é desligada, na ordem em que foram feitos.
-- **Reiniciar protótipo:** volta ao começo para o próximo participante.
+Para voltar ao começo, recarregue a página. Nada fica salvo, exceto os ajustes de texto e o modo sol.
 
 ## Tarefa sugerida para o teste de usabilidade
 

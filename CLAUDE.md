@@ -144,7 +144,7 @@ As entregas no destino, as retiradas para a volta e a chegada ficam **fora do pr
   - A alteração do João dispara **2,5 s depois do primeiro embarque** (`agendarAlteracao()`). Se o celular estiver sem sinal, fica pendente até o sinal voltar.
   - **Corrigir** não tem prazo (WCAG 2.2.1; na versão 1 eram 10 s).
 - **Ajustes de leitura:** texto grande (118%), muito grande (135%) e **modo sol** (alto contraste). São classes no `<html>`, aplicadas **só no modo motorista** e salvas em `localStorage` (chave `transporte-ajustes`, sempre dentro de try/catch).
-- **Controles do teste,** separados do app em Ajustes: "Simular celular sem sinal" e "Reiniciar protótipo".
+- **Controles do teste:** removidos da versão 2 a pedido da dupla (Ajustes só tem texto e modo sol). Para reiniciar, recarregue a página. A lógica sem sinal (`E.offline`, `E.fila`) continua no código, mas não há mais como ativá-la pela tela. A versão 1 ainda tem os controles.
 
 ### Design
 - Foco em dois tons: contorno `#12201E` com margem branca (no modo sol, amarelo com margem preta). Bordas `--line` `#738380` (≥3:1).
@@ -192,7 +192,6 @@ Onde estão os elementos exigidos:
   - caminho principal;
   - desfazer;
   - erro de motivo;
-  - modo sem sinal (o painel só recebe depois de reconectar);
   - modo sol;
   - painel do gestor.
 

@@ -364,11 +364,6 @@ body.demo{background:#D5DEDB;min-height:100vh;display:flex;flex-direction:column
     </fieldset>
     <label class="opcao"><input type="checkbox" id="aj-sol"><span><b>Modo sol</b><br><span class="pac-sub">Alto contraste para ler sob luz forte.</span></span></label>
     <button type="button" class="btn" id="aj-ok">Pronto</button>
-    <div class="coluna" style="border-top:1.5px dashed var(--line);padding-top:1rem">
-      <p class="pac-sub"><b>Controles do teste</b> (não fazem parte do app)</p>
-      <label class="opcao"><input type="checkbox" id="aj-offline">Simular celular sem sinal</label>
-      <button type="button" class="btn sec" id="aj-reiniciar">Reiniciar protótipo</button>
-    </div>
   </div>
 </dialog>
 
@@ -714,36 +709,15 @@ function aplicarAj(){
 aplicarAj();
 function abrirAjustes(){
   dlgA.querySelectorAll('input[name="tam"]').forEach(function(r){ r.checked = r.value===(aj.tam||""); });
-  $("#aj-sol").checked=!!aj.sol; $("#aj-offline").checked=E.offline;
+  $("#aj-sol").checked=!!aj.sol;
   abrir(dlgA); (dlgA.querySelector('input[name="tam"]:checked')).focus();
 }
 dlgA.addEventListener("change", function(ev){
   if (ev.target.name==="tam"){ aj.tam=ev.target.value; aplicarAj(); }
   if (ev.target.id==="aj-sol"){ aj.sol=ev.target.checked; aplicarAj(); }
-  if (ev.target.id==="aj-offline"){ mudarSinal(ev.target.checked); }
 });
-function mudarSinal(off){
-  var f=$("#faixa-sinal");
-  if (off){ E.offline=true; E.fila=[]; E.servidor.semSinalDesde=hora(); delete f.dataset.enviados; renderPainel(); }
-  else {
-    var n=E.fila.length; E.offline=false;
-    var lote=E.fila.slice().sort(function(a,b){ return a.hora<b.hora?-1:1; }); /* RN15: na ordem da hora do aparelho */
-    E.servidor.semSinalDesde=null; E.servidor.ultimaSync=hora();
-    if (lote.length) entregar(lote); else renderPainel();
-    if (n) f.dataset.enviados = n+(n===1?" registro":" registros"); else delete f.dataset.enviados;
-    E.fila=[];
-    if (E.alteracaoPendente) setTimeout(aplicarAlteracao, 1200);
-    setTimeout(function(){ delete f.dataset.enviados; renderCab(); }, 6000);
-  }
-  render();
-  anunciar(off ? "Sem sinal. Seus registros ficam guardados no celular." : "Sinal de volta. Registros enviados para a secretaria.");
-}
 function fecharAjustes(){ fechar(dlgA); $("#abrir-ajustes").focus(); }
 $("#aj-ok").addEventListener("click", fecharAjustes);
-$("#aj-reiniciar").addEventListener("click", function(){
-  clearTimeout(undoTimer); E=novoEstado(); delete $("#faixa-sinal").dataset.enviados; renderPainel();
-  fechar(dlgA); render("#titulo"); $("#tela").scrollTop=0; toast("Protótipo reiniciado.");
-});
 
 /* ---------- painel do gestor ---------- */
 function chipPac(st){
