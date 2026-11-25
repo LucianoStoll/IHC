@@ -136,14 +136,14 @@ As entregas no destino, as retiradas para a volta e a chegada ficam **fora do pr
 - **Servidor simulado:** `E.servidor` é o que o painel "sabe": situação da viagem, estado de cada paciente, motivos, eventos do feed, `ultimaSync`, `semSinalDesde` e `revisarVolta`.
 - **`registrar(ev)`:** todo check passa por aqui. Com sinal, chama `entregar([ev])`, que atualiza `E.servidor` e redesenha o painel. Sem sinal, o check vai para `E.fila`.
 - **Volta do sinal:** a fila é ordenada pela hora do aparelho (RN15) e entregue de uma vez.
-- **Corrigir (`data-a="desfazer"`):** aparece em cada registro até seguir viagem. Se o check do paciente ainda está na fila, é retirado dela; se já foi entregue, gera um evento de correção.
+- **Corrigir (`data-a="desfazer"`):** aparece em cada registro por `PRAZO_CORRIGIR` (25 s), contados para cada paciente; o texto mostra o prazo. Ao vencer, `encerrarCorrigir()` tira só a linha do cartão (sem redesenhar) e, se o foco estava no botão, leva o foco ao cartão. Se o check do paciente ainda está na fila, é retirado dela; se já foi entregue, gera um evento de correção.
 - **Acompanhante:** *Embarcou sem (nome)* (`data-a="embarcou-sem"`) registra o embarque com `semAcomp:true`. Não é um estado novo do Embarque; é um detalhe do check de embarque. **Precisa constar no relatório** (RF13), junto com a contagem de pessoas no carro.
 - **Renderização:** `render(foco)` redesenha o cabeçalho, a faixa de sinal, a lista e a barra inferior, e move o foco para o seletor indicado. `renderPainel()` só desenha se o painel estiver visível.
 - **Janelas** (`dlg-nao`, `dlg-seguir`, `dlg-ajustes`): são `<dialog>` abertos com `.show()`, não com `showModal()`, para ficarem **dentro do celular**. `abrir()` e `fechar()` cuidam do véu e de `inert` no resto da tela. O Esc, o toque no véu e arrastar a alça para baixo chamam `fecharAtual()`, que devolve o foco a quem abriu a janela.
 - **Elementos posicionados:** a barra inferior, o toast e as janelas usam `position:absolute` dentro de `.moldura` (que tem `transform`), não `fixed`.
 - **Comportamentos temporizados:**
   - A alteração do João dispara **2,5 s depois do primeiro embarque** (`agendarAlteracao()`). Se o celular estiver sem sinal, fica pendente até o sinal voltar.
-  - **Corrigir** não tem prazo (WCAG 2.2.1; na versão 1 eram 10 s).
+  - **Corrigir** fica disponível por **25 s** depois de cada registro, a pedido da dupla (na versão 1 eram 10 s, sem aviso do prazo). Um prazo fixo não atende por completo o WCAG 2.2.1.
 - **Ajustes de leitura:** texto grande (118%), muito grande (135%) e **modo sol** (alto contraste). São classes no `<html>`, aplicadas **só no modo motorista** e salvas em `localStorage` (chave `transporte-ajustes`, sempre dentro de try/catch).
 - **Controles do teste:** removidos das duas versões a pedido da dupla. Para reiniciar, recarregue a página. A lógica sem sinal (`E.offline`, `E.fila`) continua no código, mas não há como ativá-la pela tela.
 - **Ajustes (tamanho do texto e modo sol) só existem na versão 2.** A versão 1 não tem o botão nem a janela, e ignora o que a versão 2 salvou no `localStorage`.

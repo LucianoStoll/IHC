@@ -482,8 +482,8 @@ function cartao(p){
   } else if (p.estado==="nao"){
     corpo = '<p class="pac-sub">Motivo: '+esc(p.motivo)+'</p>';
   }
-  if (p.estado!=="pendente" && !E.emViagem){
-    corpo += '<div class="linha-desfazer"><span>Registrado às '+p.horaReg+'. Foi engano?</span><button type="button" class="btn link" data-a="desfazer" data-id="'+p.id+'" aria-label="Corrigir o registro de '+esc(p.nome)+'">Corrigir</button></div>';
+  if (p.estado!=="pendente" && !E.emViagem && p.corrigirAte && Date.now()<p.corrigirAte){
+    corpo += '<div class="linha-desfazer"><span>Registrado às '+p.horaReg+'. Foi engano? Corrija em até '+PRAZO_CORRIGIR+' s.</span><button type="button" class="btn link" data-a="desfazer" data-id="'+p.id+'" aria-label="Corrigir o registro de '+esc(p.nome)+'">Corrigir</button></div>';
   }
   var cls = "pac" + (E.alteracao && E.alteracao.id===p.id && !E.alteracao.lida ? " alterado" : "");
   return '<li class="'+cls+'" id="pac-'+p.id+'"><div class="pac-topo"><div class="coluna" style="gap:.15rem"><h3 class="pac-nome">'+esc(p.nome)+'</h3>'
@@ -549,12 +549,12 @@ document.addEventListener("click", function(ev){
     passa(6); p.estado="embarcado"; p.horaReg=hora(); registrar({txt:p.nome+(sem?" embarcou sem o acompanhante ("+p.acomp.split(" (")[0]+")":" embarcou"), pid:p.id, estado:"embarcado", semAcomp:sem});
     marcarDesfazer(p);
     render("#pac-"+p.id+' [data-a="desfazer"]');
-    anunciar(p.nome+" embarcou às "+p.horaReg+". Se foi engano, use Corrigir.");
+    anunciar(p.nome+" embarcou às "+p.horaReg+". Se foi engano, use Corrigir nos próximos "+PRAZO_CORRIGIR+" segundos.");
     if (!E.alteracaoFeita) agendarAlteracao();
   }
   if (a==="nao"){ abrirNao(p); }
   if (a==="desfazer"){
-    clearTimeout(undoTimer); E.desfazer=null; var era=p.estado; p.estado="pendente"; p.motivo=null; p.semAcomp=false;
+    clearTimeout(undoTimer); clearTimeout(p.tCorrigir); p.corrigirAte=0; E.desfazer=null; var era=p.estado; p.estado="pendente"; p.motivo=null; p.semAcomp=false;
     var naFila=-1; E.fila.forEach(function(ev,i){ if (ev.pid===p.id) naFila=i; });
     if (E.offline && naFila>=0) E.fila.splice(naFila,1);
     else registrar({txt:"Registro corrigido pelo motorista: "+p.nome+" voltou para Pendente", pid:p.id, estado:"pendente", revisar:(era==="nao"&&p.voltaOutra)?false:undefined, tipo:"alt"});
@@ -569,7 +569,21 @@ document.addEventListener("click", function(ev){
   if (a==="voltar-lista"){ E.emViagem=false; render("#titulo"); }
 });
 
-function marcarDesfazer(p){ E.desfazer={id:p.id}; } /* v2: sem limite de tempo (WCAG 2.2.1); a correção fica disponível até seguir viagem */
+/* Corrigir fica disponível por PRAZO_CORRIGIR segundos depois de cada registro (cada paciente tem o seu prazo) */
+var PRAZO_CORRIGIR=25;
+function marcarDesfazer(p){
+  E.desfazer={id:p.id}; clearTimeout(p.tCorrigir);
+  p.corrigirAte=Date.now()+PRAZO_CORRIGIR*1000;
+  p.tCorrigir=setTimeout(function(){ encerrarCorrigir(p); }, PRAZO_CORRIGIR*1000);
+}
+/* tira só a linha "Corrigir" do cartão, sem redesenhar a tela (não rouba o foco de quem está em outro lugar) */
+function encerrarCorrigir(p){
+  clearTimeout(p.tCorrigir); p.corrigirAte=0;
+  var linha=$("#pac-"+p.id+" .linha-desfazer"); if (!linha) return;
+  var tinhaFoco=linha.contains(document.activeElement);
+  linha.parentNode.removeChild(linha);
+  if (tinhaFoco){ var c=$("#pac-"+p.id); c.setAttribute("tabindex","-1"); c.focus(); }
+}
 
 function agendarAlteracao(){
   E.alteracaoFeita=true;
@@ -666,7 +680,7 @@ $("#form-nao").addEventListener("submit", function(ev){
   passa(5); p.estado="nao"; p.motivo=motivo; p.horaReg=hora(); registrar({txt:p.nome+" não embarcou. Motivo: "+motivo, pid:p.id, estado:"nao", motivo:motivo, revisar:p.voltaOutra?true:undefined, tipo:"alt"});
   marcarDesfazer(p);
   render("#pac-"+p.id+' [data-a="desfazer"]');
-  anunciar("Não embarque de "+p.nome+" registrado. Se foi engano, use Corrigir.");
+  anunciar("Não embarque de "+p.nome+" registrado. Se foi engano, use Corrigir nos próximos "+PRAZO_CORRIGIR+" segundos.");
 });
 
 /* ---------- seguir viagem ---------- */

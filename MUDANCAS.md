@@ -4,7 +4,7 @@ A versão 1 (`/v1/`) é a que passou pela avaliação da etapa 5 (heurísticas d
 
 | ID | Problema (etapa 5) | Correção na versão 2 | Requisito | Antes | Depois |
 |---|---|---|---|---|---|
-| C1 | PR1: registro errado só podia ser desfeito por 10 s | "Foi engano? Corrigir" em cada registro, sem prazo, até seguir viagem. Sem sinal, a correção tira o registro da fila | U1, WCAG 2.2.1 | Sem como corrigir após 10 s | Corrigir disponível após 15 s |
+| C1 | PR1: registro errado só podia ser desfeito por 10 s | "Foi engano? Corrija em até 25 s." em cada registro, com o prazo escrito na tela e contado para cada paciente. Sem sinal, a correção tira o registro da fila | U1, WCAG 2.2.1 (parcial) | 10 s, sem aviso do prazo | 25 s, com o prazo na tela; disponível após 15 s |
 | C2 | PR2: aviso da secretaria fora da área visível | Aviso preso no topo da tela até tocar em Entendi | Achados A2, A3 | 309 px acima da tela | Visível, a 39 px do topo |
 | C3 | PR3: bordas e foco com contraste baixo | Bordas `#738380`; foco em dois tons (contorno escuro e margem branca) | A1, A3, WCAG 1.4.11 e 2.4.7 | Bordas 1,76:1; foco 1,85:1 | Bordas 3,97:1; foco 16,79:1 |
 | C4 | PR4: texto a 200% cortava botões | Botões, cabeçalho e etiquetas quebram linha e empilham | A2, WCAG 1.4.4 e 1.4.10 | 465 px em tela de 390 px | 390 px, nada cortado |
